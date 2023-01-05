@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css"/>
+    <link rel="stylesheet" href="./lib/default.min.css"/><!-- for highlight.js -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript">
+        function popup() {
+            var modal = document.getElementById("modal");
+            var modal_content = document.getElementById("modal_content");
+            modal.style.display = "block";
+            modal_content.style.display = "block";
+        }
+
+    </script>
+    <script type="text/javascript" src="./lib/highlight.min.js"></script>
+    <script type="text/javascript" src="./lib/ml5.min.js"></script>
+    <script type="text/javascript" src="./lib/Tone.js"></script>
+    <script type="text/javascript" src="velato_programbuilder.js"></script>
+    <script type="text/javascript" src="velato_interface.js"></script>
+    <script type="text/javascript" src="page_controls.js"></script>
+</head>
+<body>
+<div id="outframe">
+    <div id="header">
+        <h1>Velato</h1>
+        <h2>Program by <a href="javascript:popup();">whistling</a>. A Hands-Free Code Editor by <a href="http://danieltemkin.com">Daniel Temkin</a></h2>
+    </div><div class="main">
+        <div class="input-stream box">Input Stream
+            <div id="incidentals"></div>
+        </div>
+        <div class="note-program box">
+            <div id="currentlySounding">
+                Current Note:
+                <span id="currNote"></span><br/>
+                Current Root Note:
+                <span id="rootNote"></span>
+            </div>
+            <div id="controls">
+                <div id="stop" class="button">PAUSE</div>
+                <div id="restart" class="button">RESET</div>
+                <div id="remove" class="button">UNDO</div>
+            </div>
+            <div id="error"></div>
+            <div id="notes_header">Velato Program</div>
+            <div id="notes"></div>
+        </div>
+        <div class="text-program box">
+            <div id="js-program">JS Program
+                <pre><code class="language-javascript" id="program_txt"></code></pre>
+            </div>
+            <div id="js-output">Program Output
+                <div id="output"></div>
+            </div>
+        </div>
+        <div class="instructions box">
+            <h2>Lexicon</h2>
+            <a href="javascript:popup();">How do I use this?</a>
+            <p>Cllick the play button to hear one or two options in how to sound the notes for this phrase</p>
+            <h3>Commands</h3>
+            <ul>
+                <li><span class="playbutton" onclick="tone('root 7th')">▶️</span> Undo Last Note 
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{7th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root root root root')">▶️</span> End Program
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{root}</li>
+                        <li class="note">{root}</li>
+                        <li class="note">{root}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span> Change Root note
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{2nd}</li>
+                        <li>New root note</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 3rd')">▶️</span> Let (assignment)
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{3rd}</li>
+                        <li>Variable as single note</li>
+                        <li>Expression</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 4th')">▶️</span> Declare variable
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{4th}</li>
+                        <li>Variable as single note</li>
+                    </ul>
+                </li>
+                <li><span class="ul_head">Blocks (root)</span></li>
+                <li><span class="playbutton" onclick="tone('root 3rd')">▶️</span> End Block marker
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{3rd}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span> While
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{2nd}</li>
+                        <li>Expression</li>
+                        <li>Child Commands</li>
+                        <li>End Block marker</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 5th')">▶️</span> If
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{5th}</li>
+                        <li>Expression</li>
+                        <li>Child Commands</li>
+                        <li>End Block marker</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 6th')">▶️</span> Else
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{6th}</li>
+                        <li>Child Commands</li>
+                        <li>End Block marker</li>
+                    </ul>
+                </li>
+                <li><span class='ul_head'>I/O (6th)</span></li>
+                <li><span class="playbutton" onclick="tone('root 6th 5th')">▶️</span>
+                Print
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{6th}</li>
+                        <li class="note">{5th}</li>
+                        <li>Expression</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 6th 4th')">▶️</span> Input
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{6th}</li>
+                        <li class="note">{4th}</li>
+                        <li>Variable name</li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>Expressions</h3>
+            <p>All expressions end with ")", a "(" is implied at the beginning of each expression</p>
+            <ul>
+                <li span class="ul_head">Value (1st / root)</li>
+                <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span>
+                    Variable
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{2nd}</li>
+                        <li>Tone corresponding to that variable</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 5th 5th')">▶️</span>
+                    Positive Int
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{5th}</li>
+                        <li>Single note for each digit, avoiding 5th</li>
+                        <li>Fifth to mark end of int</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 3rd 5th')">▶️</span>
+                    Negative Int
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{3rd}</li>
+                        <li>Single note for each digit, avoiding 5th</li>
+                        <li>Fifth to mark end of int</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 4th 5th')">▶️</span>
+                    Char (Unicode)
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{4th}</li>
+                        <li>Single note for each digit, avoiding {5th}</li>
+                        <li>{5th} to mark end of char</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 6th 5th 5th')">▶️</span>
+                    Positive Float
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{6th}</li>
+                        <li>Single note for each digit, avoiding {5th}</li>
+                        <li>Fifth to mark decimal point</li>
+                        <li>Single note for each digit, avoiding {5th}</li>
+                        <li>Fifth to mark end of float</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('root 7th 5th 5th')">▶️</span>
+                    Negative Float
+                    <ul>
+                        <li class="note">{root}</li>
+                        <li class="note">{7th}</li>
+                        <li>Single note for each digit, avoiding {5th}</li>
+                        <li>{5th} to mark decimal point</li>
+                        <li>Single note for each digit, avoiding {5th}</li>
+                        <li>{5th} to mark end of float</li>
+                    </ul>
+                </li>
+                <li span class="ul_head">Conditional (3rd)</li>
+                <li><span class="playbutton" onclick="tone('root 3rd 2nd')">▶️</span>
+                    Equality (==)
+                    <ul>
+                        <li class="note">{3rd}</li>
+                        <li class="note">{2nd}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('3rd 3rd')">▶️</span>
+                    Greater Than (>)
+                    <ul>
+                        <li class="note">{3rd}</li>
+                        <li class="note">{3rd}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('3rd 4th')">▶️</span>
+                    Less Than (&lt;)
+                    <ul>
+                        <li class="note">{3rd}</li>
+                        <li class="note">{4th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('3rd 5th')">▶️</span>
+                    NOT
+                    <ul>
+                        <li class="note">{3rd}</li>
+                        <li class="note">{5th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('3rd 6th')">▶️</span>
+                    AND
+                    <ul>
+                        <li class="note">{3rd}</li>
+                        <li class="note">{6th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('3rd 7th')">▶️</span>
+                    OR
+                    <ul>
+                        <li class="note">{3rd}</li>
+                        <li class="note">{7th}</li>
+                    </ul>
+                </li>
+                <li span class="ul_head">Procedural (6th)</li>
+                <li><span class="playbutton" onclick="tone('6th 6th')">▶️</span> (
+                    <ul>
+                        <li class="note">{6th}</li>
+                        <li class="note">{6th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('6th 2nd')">▶️</span> ) -- this ends all expressions
+                    <ul>
+                        <li class="note">{6th}</li>
+                        <li class="note">{2nd}</li>
+                    </ul>
+                </li>
+                <li span class="ul_head">Math (5th)</li>
+                <li><span class="playbutton" onclick="tone('5th 3rd')">▶️</span> +
+                    <ul>
+                        <li class="note">{5th}</li>
+                        <li class="note">{3rd}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('5th 2nd')">▶️</span> -
+                    <ul>
+                        <li class="note">{5th}</li>
+                        <li class="note">{2nd}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('5th 5th')">▶️</span> *
+                    <ul>
+                        <li class="note">{5th}</li>
+                        <li class="note">{5th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('5th 4th')">▶️</span> /
+                    <ul>
+                        <li class="note">{5th}</li>
+                        <li class="note">{4th}</li>
+                    </ul>
+                </li>
+                <li><span class="playbutton" onclick="tone('5th 6th')">▶️</span> % (mod)
+                    <ul>
+                        <li class="note">{5th}</li>
+                        <li class="note">{6th}</li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="padding"></div>
+        </div>
+    </div>
+</div><div id="modal"><div id="modal_content"><span class="close" id='close'>&times;</span>HOW TO WHISTLE A PROGRAM<br/>
+    <p>The input stream to the left shows any sound the interpreter thinks might be a whistle. A note needs to hold for three consecutive appearances in that list before it registers and needs a break of at least one for it to be considered a distinct note. That means that, if you start a note off-key, you can let it drift to the correct pitch before breaking it off; only the last pitch is counted.</p>
+    <p>If you are not sure how to sound a command or expression, try the play buttons in the Lexicon. Most combinations have more than one possibility: the sharp vs flat version (or perfect vs diminished) of an interval. The play button will play both.</p>
+    <p>The whistling of a Velato program gets easier with practice, but if it proves too difficult, Velato also takes a MIDI file as input.</p>
+</div>
+</div>
+</div><div id="loading_modal"><div id="modal_content">LOADING AUDIO STREAM...</div></div>
+</body>
+</html>

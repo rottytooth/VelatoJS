@@ -1,0 +1,266 @@
+@font-face {
+    font-family: Ubuntu;
+    src: url(fonts/Ubuntu/Ubuntu-Regular.ttf);
+}
+@font-face {
+    font-family: Ubuntu-Mono;
+    src: url(fonts/Ubuntu_Mono/UbuntuMono-Regular.ttf);
+}
+* {
+    margin: 0;
+}
+body, html {
+    font-family: Ubuntu;
+    background-color: #333;
+    color: #333;
+}
+#outframe {
+    max-width: 1500px;
+    background-color: #fff;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: 10px solid #333;
+    border-right: 10px solid #333;
+}
+.main {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    margin: 0;
+}
+
+/* header */
+
+#header h1 {
+    padding-top: 5px;
+}
+#header h2 {
+    padding-top: 15px;
+    font-weight: normal;
+}
+
+
+/* Column 1 */
+
+.input-stream {
+    flex: 0 0 150px;
+    border-right: 1px solid #000;
+    overflow-y: hidden;
+}
+#incidentals {
+    font-family: Ubuntu-Mono, sans-serif;
+    line-height: 200%;
+    color: #aaa;
+}
+.inrange {
+    color: #000;
+}
+/* Column 2 */
+
+.note-program {
+    flex: 25%;
+    border-right: 1px solid #000;
+    display: flex;
+    flex-direction: column;
+}
+
+#currentlySounding {
+    font-size: 20px;
+    line-height: 200%;
+    margin: 0;
+    padding-bottom: 30px; 
+    padding-left: 10px;
+    padding-top: 10px;
+    background-color: #eee;
+}
+#currNote {
+    color: #aa0000;
+}
+
+.button {
+    background-color: white;
+    border: 1px solid black;
+    padding: 10px 30px 10px 30px;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 15px;
+}
+.disabled {
+    color: #999;
+    cursor: default;
+    border: 1px solid #999;
+}
+.button:hover {
+    background-color: #ccc;
+}
+.disabled:hover {
+    background-color: #fff;
+}
+
+#error {
+    flex: 60px;
+    padding-top: 10px;
+    color: #aa0000;
+}
+
+#notes {
+    flex: 100%;
+    overflow-y: scroll;
+}
+
+/* Column 3 */
+
+.text-program {
+    flex: 25%;
+    display: flex;
+    flex-direction: column;
+}
+
+#js-program {
+    flex: 50%;
+    overflow-y: scroll;
+}
+#js-output {
+    flex: 50%;
+    overflow-y: scroll;
+}
+
+/* Column 4 */
+
+.instructions {
+    flex: 0 0 250px;
+    background-color: #eee;
+    /* color: #fff; */
+    overflow-y: scroll;
+}
+.instructions ul, li {
+    padding-left: 0;
+    margin-left: 8px;
+}
+.instructions ul {
+    line-height: 150%;
+}
+.instructions ul li ul {
+    list-style-type: none;
+}
+.instructions h3, p {
+    padding-top: 20px;
+    line-height: 200%;
+}
+.instructions h2 {
+    padding-bottom: 10px;
+}
+.instructions a, .instructions a:hover, .instructions a:visited {
+    color: #000;
+}
+.ul_head {
+    line-height: 400%;
+}
+.playbutton {
+    cursor: pointer;
+}
+.padding {
+    height: 100px;
+}
+#header {
+    height: 15vh;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 0;
+}
+
+.box {
+    height: 85vh;
+    padding-left: 10px;
+    padding-right: 20px;
+    margin: 0;
+}
+#output {
+    background-color: #eee;
+    padding: .5em;
+}
+
+/* pop-ups */
+
+#loading_modal {
+	position: fixed;
+	z-index: 98;
+    left: 50%;
+    top: 30px;
+    width: 500px;
+    transform: translate(-50%, 0);
+	overflow: auto;
+    display: block;
+}
+#modal {
+	position: fixed;
+	z-index: 99;
+	padding: 50px 0 50px 0;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0, 0, 0, .1);
+    display: none;
+}
+
+#modal_content {
+	width: 50%;
+    border: none;
+    background-color: #fbfdfe;
+	margin: auto;
+	padding: 15px;
+	border-radius: 10px;
+	overflow: hidden;
+	text-align: center;
+	box-shadow: 1px 1px 14px 3px rgba(0,0,0,0.25);	
+    pointer-events: all;
+    z-index: 9900;
+}
+#modal_content p {
+    width: 100%;
+    text-align: left;
+}
+.close {
+	color: #aaa;
+	float: right;
+    margin-top: -15px;
+	font-size: 30px;
+	font-weight: 700
+}
+.close:focus,
+.close:hover {
+	color: #000;
+	text-decoration: none;
+	cursor: pointer
+}
+
+/* Responsive layout - makes a one column layout instead of a two-column layout */
+@media (max-width: 800px) {
+    .main {
+        flex-direction: column;
+        width: 100vh;
+    }
+    .box {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        border-top: 1px solid black;
+    }
+    .box {
+        height: auto;
+    }
+    #header {
+        height: auto;
+    }
+    #outframe {
+        border: none;
+    }
+    .note-program {
+        padding-right: 10px;
+    }
+}
