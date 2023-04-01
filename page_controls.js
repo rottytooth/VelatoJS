@@ -6,6 +6,8 @@ window.addEventListener('load', load_synth);
 key = "C";
 noteset = "";
 
+rootNotSet = true;
+
 var note_translations = {
     "root" : [0],
     "2nd" : [1,2],
@@ -20,28 +22,43 @@ function load_synth() {
     synth = new Tone.Synth().toDestination();
 }
 
+function reset_root() {
+    // document.getElementsByClassName('pitch').innerText = "";
+    document.querySelectorAll('.pitch').forEach(function(p) {
+        p.innerText = "";
+    });
+}
+
 function poll_for_update_root() {
     if (velato.programbuilder.root_note != undefined) {
         curr_note = velato.programbuilder.root_note.name;
-        if (key != curr_note ) {
+
+        // is this the first note of the program or a new key?
+        if (key != curr_note || rootNotSet) {
             console.log("set root note to " + curr_note);
             key = curr_note;
+            rootNotSet = false;
 
             // update notes in instruction box
+
+            // all notes in the list
             notes_to_list = document.getElementsByClassName('instructions')[0].querySelectorAll('.note');
             for (let i = 0; i < notes_to_list.length; i++) {
                 rootnote_idx = velato.notelist.findIndex(v => v.name == key && v.octave == 4);
-                note = notes_to_list[i].innerText.trim();
+
+                // get the interval name
+                note = notes_to_list[i].querySelector(".int").innerText.trim();
                 interval_set = rootnote_idx + note_translations[note.substring(1,note.length-1)];
 
                 note_set = note_translations[note.substring(1,note.length-1)];
                 
+                note_name = "";
                 for (let j = 0; j < note_set.length;j++) {
-                    note += " ";
+                    note_name += " ";
                     if (j > 0) note += "or ";
-                    note += velato.notelist[rootnote_idx + note_set[j]].name;
+                    note_name += velato.notelist[rootnote_idx + note_set[j]].name;
                 }
-                notes_to_list[i].innerText = note;
+                notes_to_list[i].querySelector(".pitch").innerText = note_name;
             }
         }   
     }

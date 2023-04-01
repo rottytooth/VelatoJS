@@ -57,56 +57,58 @@
         <div class="instructions box">
             <h2>Lexicon</h2>
             <a href="javascript:popup();">How do I use this?</a>
-            <p>Cllick the play button to hear one or two options in how to sound the notes for this phrase</p>
+            <p>Click the play button to hear one or two options in how to sound the notes for this phrase</p>
+            <br/>
+            <span class="playbutton" onclick="tone('root')">▶️</span> Play root note 
             <h3>Commands</h3>
             <ul>
                 <li><span class="playbutton" onclick="tone('root 7th')">▶️</span> Undo Last Note 
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{7th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{7th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root root root root')">▶️</span> End Program
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{root}</li>
-                        <li class="note">{root}</li>
-                        <li class="note">{root}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span> Change Root note
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{2nd}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                         <li>New root note</li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root 3rd')">▶️</span> Let (assignment)
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{3rd}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li>Variable as single note</li>
                         <li>Expression</li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root 4th')">▶️</span> Declare variable
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{4th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                         <li>Variable as single note</li>
                     </ul>
                 </li>
                 <li><span class="ul_head">Blocks (root)</span></li>
                 <li><span class="playbutton" onclick="tone('root 3rd')">▶️</span> End Block marker
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{3rd}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span> While
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{2nd}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                         <li>Expression</li>
                         <li>Child Commands</li>
                         <li>End Block marker</li>
@@ -114,8 +116,8 @@
                 </li>
                 <li><span class="playbutton" onclick="tone('root 5th')">▶️</span> If
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{5th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li>Expression</li>
                         <li>Child Commands</li>
                         <li>End Block marker</li>
@@ -123,8 +125,8 @@
                 </li>
                 <li><span class="playbutton" onclick="tone('root 6th')">▶️</span> Else
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{6th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                         <li>Child Commands</li>
                         <li>End Block marker</li>
                     </ul>
@@ -133,17 +135,17 @@
                 <li><span class="playbutton" onclick="tone('root 6th 5th')">▶️</span>
                 Print
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{6th}</li>
-                        <li class="note">{5th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li>Expression</li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root 6th 4th')">▶️</span> Input
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{6th}</li>
-                        <li class="note">{4th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                         <li>Variable name</li>
                     </ul>
                 </li>
@@ -155,16 +157,16 @@
                 <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span>
                     Variable
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{2nd}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                         <li>Tone corresponding to that variable</li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('root 5th 5th')">▶️</span>
                     Positive Int
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{5th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li>Single note for each digit, avoiding 5th</li>
                         <li>Fifth to mark end of int</li>
                     </ul>
@@ -172,8 +174,8 @@
                 <li><span class="playbutton" onclick="tone('root 3rd 5th')">▶️</span>
                     Negative Int
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{3rd}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li>Single note for each digit, avoiding 5th</li>
                         <li>Fifth to mark end of int</li>
                     </ul>
@@ -181,8 +183,8 @@
                 <li><span class="playbutton" onclick="tone('root 4th 5th')">▶️</span>
                     Char (Unicode)
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{4th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                         <li>Single note for each digit, avoiding {5th}</li>
                         <li>{5th} to mark end of char</li>
                     </ul>
@@ -190,8 +192,8 @@
                 <li><span class="playbutton" onclick="tone('root 6th 5th 5th')">▶️</span>
                     Positive Float
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{6th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                         <li>Single note for each digit, avoiding {5th}</li>
                         <li>Fifth to mark decimal point</li>
                         <li>Single note for each digit, avoiding {5th}</li>
@@ -201,8 +203,8 @@
                 <li><span class="playbutton" onclick="tone('root 7th 5th 5th')">▶️</span>
                     Negative Float
                     <ul>
-                        <li class="note">{root}</li>
-                        <li class="note">{7th}</li>
+                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{7th}</span><span class="pitch"></span></li>
                         <li>Single note for each digit, avoiding {5th}</li>
                         <li>{5th} to mark decimal point</li>
                         <li>Single note for each digit, avoiding {5th}</li>
@@ -213,87 +215,87 @@
                 <li><span class="playbutton" onclick="tone('root 3rd 2nd')">▶️</span>
                     Equality (==)
                     <ul>
-                        <li class="note">{3rd}</li>
-                        <li class="note">{2nd}</li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('3rd 3rd')">▶️</span>
                     Greater Than (>)
                     <ul>
-                        <li class="note">{3rd}</li>
-                        <li class="note">{3rd}</li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('3rd 4th')">▶️</span>
                     Less Than (&lt;)
                     <ul>
-                        <li class="note">{3rd}</li>
-                        <li class="note">{4th}</li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('3rd 5th')">▶️</span>
                     NOT
                     <ul>
-                        <li class="note">{3rd}</li>
-                        <li class="note">{5th}</li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('3rd 6th')">▶️</span>
                     AND
                     <ul>
-                        <li class="note">{3rd}</li>
-                        <li class="note">{6th}</li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('3rd 7th')">▶️</span>
                     OR
                     <ul>
-                        <li class="note">{3rd}</li>
-                        <li class="note">{7th}</li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{7th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li span class="ul_head">Procedural (6th)</li>
                 <li><span class="playbutton" onclick="tone('6th 6th')">▶️</span> (
                     <ul>
-                        <li class="note">{6th}</li>
-                        <li class="note">{6th}</li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('6th 2nd')">▶️</span> ) -- this ends all expressions
                     <ul>
-                        <li class="note">{6th}</li>
-                        <li class="note">{2nd}</li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li span class="ul_head">Math (5th)</li>
                 <li><span class="playbutton" onclick="tone('5th 3rd')">▶️</span> +
                     <ul>
-                        <li class="note">{5th}</li>
-                        <li class="note">{3rd}</li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('5th 2nd')">▶️</span> -
                     <ul>
-                        <li class="note">{5th}</li>
-                        <li class="note">{2nd}</li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('5th 5th')">▶️</span> *
                     <ul>
-                        <li class="note">{5th}</li>
-                        <li class="note">{5th}</li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('5th 4th')">▶️</span> /
                     <ul>
-                        <li class="note">{5th}</li>
-                        <li class="note">{4th}</li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li><span class="playbutton" onclick="tone('5th 6th')">▶️</span> % (mod)
                     <ul>
-                        <li class="note">{5th}</li>
-                        <li class="note">{6th}</li>
+                        <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
+                        <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
             </ul>

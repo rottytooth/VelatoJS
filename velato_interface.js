@@ -138,6 +138,7 @@ var velato_interface = function () {
         document.getElementById("error").innerHTML = "";
         document.getElementById("output").innerHTML = "";
 
+        reset_root();
 
         stopbtn = document.getElementById("stop");
         stopbtn.classList.remove("disabled");
@@ -284,12 +285,14 @@ var velato_interface = function () {
         currNoteOut = document.getElementById("currNote");
         currNoteOut.innerHTML = `${currNote.name}`; // ${currNote.octave}`;
 
-        root_idx = velato.programbuilder.root_note.index;
-        while (root_idx > currNote.index)
-            root_idx -= 12;
-        interval = (currNote.index - root_idx) % 12;
-        interval_name = note_translations[interval];
-        currNoteOut.innerHTML += ` (${interval_name})`
+        if (velato.programbuilder.root_note != null) {
+            root_idx = velato.programbuilder.root_note.index;
+            while (root_idx > currNote.index)
+                root_idx -= 12;
+            interval = (currNote.index - root_idx) % 12;
+            interval_name = note_translations[interval];
+            currNoteOut.innerHTML += ` (${interval_name})`
+        }
     }
 
     function complete_program() {
