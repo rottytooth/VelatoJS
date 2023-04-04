@@ -9,20 +9,49 @@
 * {
     margin: 0;
 }
+
+/* global color scheme */
+:root {
+    --main-txt-color: #9EFFFF; /*#0088FF;*/
+    --txt-emphasis: #52beff;
+    --bright-emphasis: #3AD900; /*#9EFFFF;*/
+    --header: #fff;
+    --focus-emphasis: #FF80E1;
+    --panel-back: #013a6c; /*#002240;*/
+    --default-bck: #011a31;
+    --line-border: #23536a;
+    --error: #ff2121;
+    --silence: #52beff; /*#014480;*/
+
+    /* syntax colors */
+    --code-default: #FFFFFF;
+    --code-var: #9EFFFF;
+    --code-def: #FFFFFF;
+    --code-operator: #FFFFFF;
+    --code-number: #FF80E1;
+    --code-comment: #0088FF;
+    --code-keyword: #FFEE80;
+    --code-string: #3AD900;
+    --code-meta: #FF9D00;
+}
+
+/* top level elements */
+
 body, html {
     font-family: Ubuntu;
-    background-color: #333;
-    color: #333;
+    background-color: var(--default-bck);
+    color: var(--main-txt-color);
+    overflow-y: hidden;
 }
 #outframe {
     max-width: 1500px;
-    background-color: #fff;
+    background-color: var(--default-bck);
     margin-top: 0;
     margin-bottom: 0;
     margin-left: auto;
     margin-right: auto;
-    border-left: 10px solid #333;
-    border-right: 10px solid #333;
+    border-left: 10px solid var(--default-bck);
+    border-right: 10px solid var(--default-bck);
 }
 .main {
     display: flex;
@@ -33,35 +62,57 @@ body, html {
 
 /* header */
 
+#header {
+    height: 6vh;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 0;
+    background-color: var(--default-bck);
+}
 #header h1 {
-    padding-top: 5px;
+    padding-top: 4px;
+    display: inline;
+    margin-right: 16px;
+    padding-left: 4px;
+    padding-right: 4px;
+    /* color: #FF80E1; */
+    color: var(--header);
 }
 #header h2 {
     padding-top: 15px;
-    font-weight: normal;
+    /* font-weight: normal; */
+    font-size: 120%;
+    display: inline;
+    color: var(--main-txt-color);
 }
-
+#whistling {
+    color: var(--txt-emphasis);
+}
+#danieltemkin {
+    color: var(--main-txt-color);
+}
 
 /* Column 1 */
 
 .input-stream {
     flex: 0 0 150px;
-    border-right: 1px solid #000;
+    background-color: var(--panel-back);
+    color: var(--main-txt-color);
     overflow-y: hidden;
 }
 #incidentals {
     font-family: Ubuntu-Mono, sans-serif;
     line-height: 200%;
-    color: #aaa;
+    color: var(--silence);
 }
 .inrange {
-    color: #000;
+    color: var(--main-txt-color);
 }
 /* Column 2 */
 
 .note-program {
     flex: 25%;
-    border-right: 1px solid #000;
+    border-right: 1px solid var(--line-border);
     display: flex;
     flex-direction: column;
 }
@@ -73,15 +124,19 @@ body, html {
     padding-bottom: 30px; 
     padding-left: 10px;
     padding-top: 10px;
-    background-color: #eee;
+    background-color: var(--panel-back);
+    color: var(--main-txt-color);
+    /* color: var(--bright-emphasis); */
 }
 #currNote {
-    color: #aa0000;
+    color: var(--focus-emphasis);
 }
-
+#rootNote {
+    color: var(--bright-emphasis);    
+}
 .button {
-    background-color: white;
-    border: 1px solid black;
+    background-color: var(--panel-back);
+    border: 1px solid var(--line-border);
     padding: 10px 30px 10px 30px;
     cursor: pointer;
     display: inline-block;
@@ -104,12 +159,34 @@ body, html {
 #error {
     flex: 60px;
     padding-top: 10px;
-    color: #aa0000;
+    color: var(--error);
 }
-
+.notes_header {
+    display: flex;
+    flex: 50%;
+    flex-direction: column
+}
 #notes {
-    flex: 100%;
-    overflow-y: scroll;
+    display: flex;
+    flex: 50%;
+    overflow-y: auto;
+    flex-direction: column
+}
+#curr_cmd_notes {
+    display: flex;
+    flex: 50%;
+    overflow-y: auto;
+    flex-direction: column;
+    background-color: var(--panel-back);
+    font-size: 20px;
+    padding-left: 5px;
+    padding-top: 5px;
+}
+#curr_cmd_notes .desc {
+    color: var(--bright-emphasis);
+}
+#curr_cmd_notes .exp {
+    color: var(--code-keyword);
 }
 
 /* Column 3 */
@@ -128,14 +205,41 @@ body, html {
     flex: 50%;
     overflow-y: scroll;
 }
+#program_txt {
+    color: val(--code-default);
+}
+#program_txt .var {
+    color: var(--code-var);
+}
+#program_txt .def {
+    color: var(--code-def);
+}
+#program_txt .oper {
+    color: var(--code-operator);
+}
+#program_txt .num {
+    color: var(--code-number);
+}
+#program_txt .cmt {
+    color: var(--code-comment);
+}
+#program_txt .key {
+    color: var(--code-keyword);
+}  
+#program_txt .str {
+    color: var(--code-string);
+}
+#program_txt .meta {
+    color: var(--code-meta);
+}
 
 /* Column 4 */
 
 .instructions {
     flex: 0 0 250px;
-    background-color: #eee;
-    /* color: #fff; */
+    border-left: 5px solid var(--panel-back);
     overflow-y: scroll;
+    padding-top: 10px;
 }
 .instructions ul, li {
     padding-left: 0;
@@ -152,35 +256,31 @@ body, html {
     line-height: 200%;
 }
 .instructions h2 {
+    /* color: var(--bright-emphasis); */
     padding-bottom: 10px;
 }
 .instructions a, .instructions a:hover, .instructions a:visited {
-    color: #000;
+    color: var(--txt-emphasis);
 }
 .ul_head {
     line-height: 400%;
 }
 .playbutton {
     cursor: pointer;
+    text-decoration: underline;
+    color: var(--txt-emphasis);
 }
 .padding {
     height: 100px;
 }
-#header {
-    height: 15vh;
+.box {
     padding-left: 10px;
     padding-right: 10px;
     margin: 0;
-}
-
-.box {
-    height: 85vh;
-    padding-left: 10px;
-    padding-right: 20px;
-    margin: 0;
+    height: 94vh;
 }
 #output {
-    background-color: #eee;
+    /* background-color: #002240; */
     padding: .5em;
 }
 

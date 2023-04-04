@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="styles.css"/>
-    <link rel="stylesheet" href="./lib/default.min.css"/><!-- for highlight.js -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript">
         function popup() {
@@ -14,7 +13,6 @@
         }
 
     </script>
-    <script type="text/javascript" src="./lib/highlight.min.js"></script>
     <script type="text/javascript" src="./lib/ml5.min.js"></script>
     <script type="text/javascript" src="./lib/Tone.js"></script>
     <script type="text/javascript" src="velato_programbuilder.js"></script>
@@ -25,7 +23,7 @@
 <div id="outframe">
     <div id="header">
         <h1>Velato</h1>
-        <h2>Program by <a href="javascript:popup();">whistling</a>. A Hands-Free Code Editor by <a href="http://danieltemkin.com">Daniel Temkin</a></h2>
+        <h2>Program by <a href="javascript:popup();" id="whistling">whistling</a>. A Hands-Free Code Editor by <a href="http://danieltemkin.com" id="danieltemkin">Daniel Temkin</a></h2>
     </div><div class="main">
         <div class="input-stream box">Input Stream
             <div id="incidentals"></div>
@@ -43,8 +41,14 @@
                 <div id="remove" class="button">UNDO</div>
             </div>
             <div id="error"></div>
-            <div id="notes_header">Velato Program</div>
-            <div id="notes"></div>
+            <div style="flex-direction: row; display:flex;">
+                <div class="notes_header">Velato Program</div>
+                <div class="notes_header">Current Command</div>
+            </div>
+            <div style="flex-direction: row; display:flex;flex: 100%;">
+                <div id="notes"></div>
+                <div id="curr_cmd_notes"><span class="exp">Whistle one note to set the root. Then whistle your first command!<br/><br/>Look at the Lexicon to the right for options.</span></div>
+            </div>
         </div>
         <div class="text-program box">
             <div id="js-program">JS Program
@@ -57,55 +61,50 @@
         <div class="instructions box">
             <h2>Lexicon</h2>
             <a href="javascript:popup();">How do I use this?</a>
-            <p>Click the play button to hear one or two options in how to sound the notes for this phrase</p>
+            <p>Click the play button (&#x23F5;) to hear one or two options in how to sound the notes for this phrase</p>
             <br/>
-            <span class="playbutton" onclick="tone('root')">▶️</span> Play root note 
+            <span class="playbutton" onclick="tone('root')"><b>&#x23F5;</b> Play root note</span>
             <h3>Commands</h3>
             <ul>
-                <li><span class="playbutton" onclick="tone('root 7th')">▶️</span> Undo Last Note 
+                <li><span class="playbutton" onclick="tone('7th')"><b>&#x23F5;</b> Undo Last Note</span> 
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{7th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root root root root')">▶️</span> End Program
+                <li><span class="playbutton" onclick="tone('root root root')"><b>&#x23F5;</b> End Program</span>
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span> Change Root note
+                <li><span class="playbutton" onclick="tone('2nd')"><b>&#x23F5;</b> Change Root note</span>
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                         <li>New root note</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 3rd')">▶️</span> Let (assignment)
+                <li><span class="playbutton" onclick="tone('3rd')"><b>&#x23F5;</b> Let (assignment)</span>
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li>Variable as single note</li>
                         <li>Expression</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 4th')">▶️</span> Declare variable
+                <li><span class="playbutton" onclick="tone('4th')"><b>&#x23F5;</b> Declare variable</span>
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                         <li>Variable as single note</li>
                     </ul>
                 </li>
                 <li><span class="ul_head">Blocks (root)</span></li>
-                <li><span class="playbutton" onclick="tone('root 3rd')">▶️</span> End Block marker
+                <li><span class="playbutton" onclick="tone('root 3rd')"><b>&#x23F5;</b> End Block marker</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span> While
+                <li><span class="playbutton" onclick="tone('root 2nd')"><b>&#x23F5;</b> While</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
@@ -114,7 +113,7 @@
                         <li>End Block marker</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 5th')">▶️</span> If
+                <li><span class="playbutton" onclick="tone('root 5th')"><b>&#x23F5;</b> If</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
@@ -123,7 +122,7 @@
                         <li>End Block marker</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 6th')">▶️</span> Else
+                <li><span class="playbutton" onclick="tone('root 6th')"><b>&#x23F5;</b> Else</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
@@ -132,18 +131,16 @@
                     </ul>
                 </li>
                 <li><span class='ul_head'>I/O (6th)</span></li>
-                <li><span class="playbutton" onclick="tone('root 6th 5th')">▶️</span>
-                Print
+                <li><span class="playbutton" onclick="tone('6th 5th')"><b>&#x23F5;</b>
+                Print</span>
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li>Expression</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 6th 4th')">▶️</span> Input
+                <li><span class="playbutton" onclick="tone('6th 4th')"><b>&#x23F5;</b> Input</span>
                     <ul>
-                        <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                         <li>Variable name</li>
@@ -154,16 +151,16 @@
             <p>All expressions end with ")", a "(" is implied at the beginning of each expression</p>
             <ul>
                 <li span class="ul_head">Value (1st / root)</li>
-                <li><span class="playbutton" onclick="tone('root 2nd')">▶️</span>
-                    Variable
+                <li><span class="playbutton" onclick="tone('root 2nd')"><b>&#x23F5;</b>
+                    Variable</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                         <li>Tone corresponding to that variable</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 5th 5th')">▶️</span>
-                    Positive Int
+                <li><span class="playbutton" onclick="tone('root 5th 5th')"><b>&#x23F5;</b>
+                    Positive Int</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
@@ -171,8 +168,8 @@
                         <li>Fifth to mark end of int</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 3rd 5th')">▶️</span>
-                    Negative Int
+                <li><span class="playbutton" onclick="tone('root 3rd 5th')"><b>&#x23F5;</b>
+                    Negative Int</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
@@ -180,8 +177,8 @@
                         <li>Fifth to mark end of int</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 4th 5th')">▶️</span>
-                    Char (Unicode)
+                <li><span class="playbutton" onclick="tone('root 4th 5th')"><b>&#x23F5;</b>
+                    Char (Unicode)</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
@@ -189,8 +186,8 @@
                         <li>{5th} to mark end of char</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 6th 5th 5th')">▶️</span>
-                    Positive Float
+                <li><span class="playbutton" onclick="tone('root 6th 5th 5th')"><b>&#x23F5;</b>
+                    Positive Float</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
@@ -200,8 +197,8 @@
                         <li>Fifth to mark end of float</li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('root 7th 5th 5th')">▶️</span>
-                    Negative Float
+                <li><span class="playbutton" onclick="tone('root 7th 5th 5th')"><b>&#x23F5;</b>
+                    Negative Float</span>
                     <ul>
                         <li class="note"><span class="int">{root}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{7th}</span><span class="pitch"></span></li>
@@ -212,87 +209,87 @@
                     </ul>
                 </li>
                 <li span class="ul_head">Conditional (3rd)</li>
-                <li><span class="playbutton" onclick="tone('root 3rd 2nd')">▶️</span>
-                    Equality (==)
+                <li><span class="playbutton" onclick="tone('3rd 2nd')"><b>&#x23F5;</b>
+                    Equality (==)</span>
                     <ul>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('3rd 3rd')">▶️</span>
-                    Greater Than (>)
+                <li><span class="playbutton" onclick="tone('3rd 3rd')"><b>&#x23F5;</b>
+                    Greater Than (&gt;)</span>
                     <ul>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('3rd 4th')">▶️</span>
-                    Less Than (&lt;)
+                <li><span class="playbutton" onclick="tone('3rd 4th')"><b>&#x23F5;</b>
+                    Less Than (&lt;)</span>
                     <ul>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('3rd 5th')">▶️</span>
-                    NOT
+                <li><span class="playbutton" onclick="tone('3rd 5th')"><b>&#x23F5;</b>
+                    NOT</span>
                     <ul>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('3rd 6th')">▶️</span>
-                    AND
+                <li><span class="playbutton" onclick="tone('3rd 6th')"><b>&#x23F5;</b>
+                    AND</span>
                     <ul>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('3rd 7th')">▶️</span>
-                    OR
+                <li><span class="playbutton" onclick="tone('3rd 7th')"><b>&#x23F5;</b>
+                    OR</span>
                     <ul>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{7th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li span class="ul_head">Procedural (6th)</li>
-                <li><span class="playbutton" onclick="tone('6th 6th')">▶️</span> (
+                <li><span class="playbutton" onclick="tone('6th 6th')"><b>&#x23F5;</b> (</span>
                     <ul>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('6th 2nd')">▶️</span> ) -- this ends all expressions
+                <li><span class="playbutton" onclick="tone('6th 2nd')"><b>&#x23F5;</b> ) </span> -- this ends all expressions
                     <ul>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
                 <li span class="ul_head">Math (5th)</li>
-                <li><span class="playbutton" onclick="tone('5th 3rd')">▶️</span> +
+                <li><span class="playbutton" onclick="tone('5th 3rd')"><b>&#x23F5;</b> +</span>
                     <ul>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{3rd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('5th 2nd')">▶️</span> -
+                <li><span class="playbutton" onclick="tone('5th 2nd')"><b>&#x23F5;</b> -</span>
                     <ul>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{2nd}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('5th 5th')">▶️</span> *
+                <li><span class="playbutton" onclick="tone('5th 5th')"><b>&#x23F5;</b> *</span>
                     <ul>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('5th 4th')">▶️</span> /
+                <li><span class="playbutton" onclick="tone('5th 4th')"><b>&#x23F5;</b> /</span>
                     <ul>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{4th}</span><span class="pitch"></span></li>
                     </ul>
                 </li>
-                <li><span class="playbutton" onclick="tone('5th 6th')">▶️</span> % (mod)
+                <li><span class="playbutton" onclick="tone('5th 6th')"><b>&#x23F5;</b> % (mod)</span>
                     <ul>
                         <li class="note"><span class="int">{5th}</span><span class="pitch"></span></li>
                         <li class="note"><span class="int">{6th}</span><span class="pitch"></span></li>

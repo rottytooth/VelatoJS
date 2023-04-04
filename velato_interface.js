@@ -135,8 +135,12 @@ var velato_interface = function () {
         velato.programbuilder.reset_program();
         
         document.getElementById("notes").innerHTML = "";
+        document.getElementById("curr_cmd_notes").innerHTML = "";
         document.getElementById("error").innerHTML = "";
         document.getElementById("output").innerHTML = "";
+        document.getElementById("program_txt").innerHTML = "";
+
+        pr.program_text = "";
 
         reset_root();
 
@@ -222,8 +226,10 @@ var velato_interface = function () {
             // if we held the current note long enough, record it
             if (currNote.notes > MIN_LENGTH_OF_NOTE) {
                 program = document.getElementById("notes");
+                curr_cmd_notes = document.getElementById("curr_cmd_notes");
                 program.innerHTML = program.innerHTML + `${currNote.name} ${currNote.octave}<br/>`;
                 program.scrollTop = program.scrollHeight;
+                curr_cmd_notes.innerHTML += "<br>" + currNote.name;
 
                 var err = document.getElementById("error");
                 // register it in the program

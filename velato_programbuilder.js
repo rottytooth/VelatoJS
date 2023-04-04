@@ -48,9 +48,18 @@ velato.programbuilder = {};
     _print_output = function() {
         var program = document.getElementById("program_txt");
         program.innerHTML = pr.program_text + pr.curr_line;
-        hljs.highlightAll(); // highlight.js 
+//        hljs.highlightAll(); // highlight.js 
         _clear_err();
         pr.curr_token = []; // if we're updating, there is a new token to print, meaning we should clear this
+        var curr_cmd_notes = document.getElementById("curr_cmd_notes");
+        curr_cmd_notes.innerHTML = "";
+    }
+
+    _dress = function(desc, exp) {
+        var cmd = document.getElementById("curr_cmd_notes");
+        style = 'desc';
+        if (exp) style = 'exp';
+        cmd.innerHTML += ` <span class='${style}'>${desc}</span>`;
     }
 
     _clear_err = function() {
@@ -71,7 +80,6 @@ velato.programbuilder = {};
 
         // update on screen
         _print_output();
-
     }
 
     // reset the text of code for the current line, the set of tones, and all the flags
@@ -143,17 +151,27 @@ velato.programbuilder = {};
                 _building_int = true; // treat the rest as if we're building an int
             }
             else { 
-                if (_building_char) _add_exp(")"); // closes out the tochar()
+                if (_building_char) _add_exp("</span><span class=\"oper\">)</span>"); // closes out the tochar()
 
                 // we're done with this number
                 _building_char = false;
                 _building_int = false;
+                _add_exp("</span>");
             }
         } else {
             if (digit > 7) digit -= 2; // if higher than a Fifth, subtract offset
             pr.curr_line += digit; // add digit to number
         }
         _print_output();
+    }
+
+    _activate_expression_mode = (then_commands) => {
+        if (then_commands)
+            _building_expression_childcommands = true;
+        else
+            _building_expression = true;
+
+        _dress("expression mode", true);
     }
 
     _interpret_expression = function(note) {
@@ -163,29 +181,66 @@ velato.programbuilder = {};
             _throw_error("expression too long and not resolved");
         }
 
+        if (pr.curr_token.length == 1) {
+            switch(pr.curr_token[0]) {
+                case 0:
+                    _dress("variable or value");
+                    break;
+                case 3:
+                case 4:
+                    _dress("conditional");
+                    break;
+                case 6:
+                case 7:
+                    _dress("algebraic symbol");
+                    break;
+                case 8:
+                case 9:
+                    _dress("parentheses");
+                    break;
+
+            }
+        }
+
         if (pr.curr_token.length == 2) {
             switch(pr.curr_token[0]) {
                 case 0: // root "value"
                     switch(pr.curr_token[1]) {
+                        case 1:
+                        case 2:
+                            _dress("variable");
+                            break;
                         case 3:
                         case 4: // third "negative int"
-                            _add_exp("-");
+                            _dress("negative int");
+                            _dress("int creation mode, ends with a 5th");
+                            _add_exp("<span class=\"oper\">-</span><span class=\"num\">");
                             _building_int = true;
                             return;
                         case 5: // fourth "char"
-                            _add_exp("String.fromCharCode(");
+                            _dress("char");
+                            _dress("char creation mode, ends with a 5th");
+                            _add_exp("<span class=\"var\">String</span><span class=\"oper\">.</span><span class=\"var\">fromCharCode</span><span class=\"oper\">(</span><span class=\"num\">");
                             _building_char = true;
                             return;
                         case 6:
                         case 7: // fifth "positive int"
+                            _dress("positive int");
+                            _dress("int creation mode, ends with a 5th");
+                            _add_exp("<span class=\"num\">");
                             _building_int = true;
                             return;
                         case 8:
                         case 9: // sixth "positive double"
+                            _dress("positive float");
+                            _dress("float creation mode, first 5th indicates decimal, second ends number");
+                            _add_exp("<span class=\"num\">");
                             _building_float = true;
                             return;
                         case 10: // seventh "negative double"
-                            _add_exp("-"); 
+                            _dress("negative float");
+                            _dress("float creation mode, first 5th indicates decimal, second ends number");
+                            _add_exp("<span class=\"oper\">-</span><span class=\"num\">");
                             _building_float = true;
                             return;
                         // don't throw error, expression might be more than 2 letters
@@ -195,27 +250,26 @@ velato.programbuilder = {};
                 case 4: // third "conditional"
                     switch(pr.curr_token[1]) {
                         case 1:
-                        case 2: // second "equality"
-                            _add_exp("==");
+                            _add_exp("<span class=\"oper\">==</span>");
                             return;
                         case 3:
                         case 4: // third "greater than"
-                            _add_exp(">");
+                            _add_exp("<span class=\"oper\">&gt;</span>");
                             return;
                         case 5: // fourth "less than"
-                            _add_exp("<");
+                            _add_exp("<span class=\"oper\">&lt;</span>");
                             return;
                         case 6:
                         case 7: // fifth "not"
-                            _add_exp("!");
+                            _add_exp("<span class=\"oper\">!</span>");
                             return;
                         case 8:
                         case 9: // sixth "and"
-                            _add_exp("&&");
+                            _add_exp("<span class=\"oper\">&&</span>");
                             return;
                         case 10:
                         case 11: // seventh "or"
-                            _add_exp("||");
+                            _add_exp("<span class=\"oper\">||</span>");
                             return;
                     }
                     break;
@@ -224,22 +278,22 @@ velato.programbuilder = {};
                     switch(pr.curr_token[1]) {
                         case 3:
                         case 4: // third "+"
-                            _add_exp("+");
+                            _add_exp("<span class=\"oper\">+</span>");
                             return;
                         case 1:
                         case 2: // second "-"
-                            _add_exp("-");
+                            _add_exp("<span class=\"oper\">-</span>");
                             return;
                         case 6:
                         case 7: // fifth "*"
-                            _add_exp("*");
+                            _add_exp("<span class=\"oper\">*</span>");
                             return;
                         case 5: // fourth "/"
-                            _add_exp("/");
+                            _add_exp("<span class=\"oper\">/</span>");
                             return;
                         case 8:
                         case 9: // sixth mod
-                            _add_exp("%");
+                            _add_exp("<span class=\"oper\">%</span>");
                             return;
                     }
                 case 8:
@@ -247,12 +301,12 @@ velato.programbuilder = {};
                     switch (pr.curr_token[1]) {
                         case 8:
                         case 9: // sixth "("
-                            _add_exp("(");
+                            _add_exp("<span class=\"oper\">(</span>");
                             _parensdepth++;
                             return;
                         case 1:
                         case 2: // second ")"
-                            pr.curr_line += ")";
+                            pr.curr_line += "<span class=\"oper\">)</span>";
                             _parensdepth--; // closed a parentheses set
                             if (_parensdepth == 0) { // we're at the end of an expression
 
@@ -260,11 +314,11 @@ velato.programbuilder = {};
 
                                 // if we are not in a block that is going straight from expression to command, add the closing semicolon
                                 if (!_building_expression_childcommands) {
-                                    pr.curr_line += ";";
+                                    pr.curr_line += "<span class=\"oper\">;</span>";
                                     pr.complete_line(pr.curr_line);
                                 } else {
                                     _building_expression_childcommands = false;
-                                    pr.curr_line += " {";
+                                    pr.curr_line += "<span class=\"oper\"> {</span>";
                                     pr.complete_line(pr.curr_line);
                                     _stackdepth++;
                                 }
@@ -296,11 +350,33 @@ velato.programbuilder = {};
 
         if (pr.curr_token.length == 1) {
             switch (pr.curr_token[0]) {
+                case 0:
+                    _dress("blocks / loops");
+                    break;
                 case 1:
                 case 2: // second "root note change"
                     pr.root_note = null; // will trigger reset of root_note
-                    pr.complete_line("// changed root note");
+                    _dress("new root_note");
                     break;
+                case 3:
+                case 4:
+                    _dress("let (assignment)");
+                    break;
+                case 5:
+                    _dress("declare");
+                    break;
+                case 8:
+                case 9:
+                    _dress("i/o");
+                    break;
+                case 10:
+                case 11: // seventh "undo last"
+                    // this removes the last note but almost certainly doesn't work in a number of cases
+                    //FIXME: This should be undoing a complete command, not a note
+                    pr.curr_token = pr.curr_token.slice(0, pr.curr_token.length-1);
+                    _dress("undoing last note");
+                    pr.complete_line("");
+                    return;
             }
         }
 
@@ -310,10 +386,11 @@ velato.programbuilder = {};
                     switch(pr.curr_token[1]) {
                         case 1:
                         case 2: // second "while"
-                            pr.curr_line = "while(";
+                            pr.curr_line = "<span class=\"key\">while</span><span class=\"oper\">(</span>";
                             _print_output();
                             _parensdepth++;
                             _building_expression_childcommands = true;
+                            _activate_expression_mode(true);
                             return;
                         case 3: 
                         case 4: // third "end block"
@@ -321,31 +398,31 @@ velato.programbuilder = {};
                                 _print_output();
                                 _throw_error("no block to close out of");
                             }
-                            pr.complete_line("}");
+                            pr.complete_line("<span class=\"oper\">}</span>");
                             _stackdepth--;
                             return;
                         case 6:
                         case 7: // fifth "if"
-                            pr.curr_line = "if(";
+                            pr.curr_line = "<span class=\"key\">if</span><span class=\"oper\">(</a>";
                             _print_output();
                             _parensdepth++;
-                            _building_expression_childcommands = true;
+                            _activate_expression_mode(true);
                             return;
                         case 8:
                         case 9: // sixth "else"
-                            pr.complete_line("} else {");
+                            pr.complete_line("<span class=\"oper\">}</span> <span class=\"key\">else</span> <span class=\"oper\">{</span>");
                             return;
                     }
                     break;
                 case 3:
                 case 4: // third "let"
-                    pr.curr_line += pr.note_to_varname(note) + " = (";
+                    pr.curr_line += pr.note_to_varname(note) + "<span class=\"oper\"> = (</span>";
                     _print_output();
                     _parensdepth++;
-                    _building_expression= true;
-                    break;
+                    _activate_expression_mode();
+                                    break;
                 case 5: // fourth "declare"
-                    pr.complete_line("var " + pr.note_to_varname(note) + ";");
+                    pr.complete_line("<span class=\"key\">var</span> <span class=\"def\">" + pr.note_to_varname(note) + "</span><span class=\"oper\">;</span>");
                     break;
 
                 case 8:
@@ -353,25 +430,20 @@ velato.programbuilder = {};
                     switch(pr.curr_token[1]) {
                         case 6:
                         case 7: // fifth "print"
-                            pr.curr_line = "print(";
+                            pr.curr_line = "<span class=\"var\">print</a><span class=\"oper\">(</span>";
                             _print_output();
                             _parensdepth++;
-                            _building_expression= true;
+                            _activate_expression_mode();
                             return;
                     }
                     break;
-                case 10:
-                case 11: // seventh "undo last"
-                    // this removes the last note but almost certainly doesn't work in a number of cases
-                    pr.curr_token = pr.curr_token.slice(0, pr.curr_token.length-1);
-                    return;
             }
         }
 
         // it takes three notes to end the program
         if (pr.curr_token.length == 3) {
             if (pr.curr_token[0] == 0 && pr.curr_token[1] == 0 && pr.curr_token[2] == 0) {
-                pr.complete_line("// completed program");
+                pr.complete_line("<span class=\"cmt\">// completed program</span>");
                 _print_output();
                 return true; // program is complete
             }
@@ -383,7 +455,7 @@ velato.programbuilder = {};
                 case 9: // sixth "special commands"
                     switch(pr.curr_token[1]) {
                         case 5: // fourth "input"
-                            pr.complete_line(`${pr.note_to_varname(note)} = window.input();`);
+                            pr.complete_line(`${pr.note_to_varname(note)} = <span class=\"var\">window</span><span class=\"oper\">.</span><span class=\"var\">input</span><span class=\"oper\">();</span>`);
                             return;
                         default:
                             _throw_error();
@@ -405,6 +477,7 @@ velato.programbuilder = {};
         // check for root note first, as interval() will fail without it
         if (pr.root_note === null) { // we don't have a current root note
             pr.update_root(note);
+            pr.complete_line("<span class=\"cmt\">// set root note to " + note.name + "</span>");
             pr.reset_line(); // clear everything
             return;
         }
