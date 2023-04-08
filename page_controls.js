@@ -91,10 +91,7 @@ function tone(note_seq) {
 
     const now = Tone.now();
 
-    octave = 4;
-    if (key > 'D' || key < 'C') {
-        octave = 3;
-    }
+    octave = 3;
 
     rootnote_idx = velato.notelist.findIndex(v => v.name == key && v.octave == octave);
     notes = note_seq.split(" ");

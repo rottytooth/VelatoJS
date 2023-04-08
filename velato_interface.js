@@ -162,13 +162,14 @@ var velato_interface = function () {
         document.getElementById("output").innerHTML = "";
         document.getElementById("program_txt").innerHTML = "";
 
-        pr.program_text = "";
+        velato.programbuilder.program_text = "";
 
         reset_root();
 
-        stopbtn = document.getElementById("stop");
-        stopbtn.classList.remove("disabled");
-        stopbtn.onclick = stopevent;
+
+        if (is_stopped) {
+            resume();
+        }
     }
 
     function remove_last_note() {
