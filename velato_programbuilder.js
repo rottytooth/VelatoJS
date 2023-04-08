@@ -11,6 +11,23 @@ velato.programbuilder = {};
     pr.root_note = null; // the current root note which we use to compare intervals
     pr.notelist = []; // a list of one octave of notes, used as reference to calculate intervals
 
+    const DEFAULT_ACCIDENTALS = ["A♭","B♭","C♯","E♭","F♯"];
+
+    const SPECIAL_KEYS = {
+        "C": {
+            "acc": ["F♯"],
+            "def": "♭"
+        },
+        "G": {
+            "acc": ["B♭","E♭"],
+            "def": "♯"
+        },
+        "D": {
+            "acc": ["B♭"],
+            "def": "♯"
+        }
+    };
+
     // Flags for the type of input we're dealing with (expression, digit, etc)
     // and for where we are in the program stack.
     // These capture the current state of the program input.
@@ -39,9 +56,73 @@ velato.programbuilder = {};
         return diff;
     }
 
+    pr.build_accidental = function(names, root) {
+
+        acc = (names.length === 2); // passed note has an accidental
+
+        if (acc) {
+            flatv = names.find(x => x.includes("♭"));
+            sharpv = names.find(x => x.includes("♯"));
+        } else 
+            var name = names[0];
+
+        // if both root and passed note have accidentals
+        if (acc) { 
+            // if the note is the root
+            if (root === flatv || root === sharpv) {
+                return root;
+            }
+            // if the root is a flat, we also sound the flat
+            if (root.includes("♭")) {
+                return flatv;
+            }
+            // check if it's a "special" key whose minor is in flats and major not so
+            if (root in SPECIAL_KEYS) {
+                if (flatv in SPECIAL_KEYS[root].acc)
+                    return flatv;
+                if (sharpv in SPECIAL_KEYS[root].acc)
+                    return sharpv;
+                if (SPECIAL_KEYS[root].def == "♭")
+                    return flatv;
+                return sharpv;
+            }
+            // otherwise, it's the sharp that wins
+            return sharpv;
+        }
+
+        // e.g. B is sounded in key of B♭
+        if (root.length == 2 && root.substring(0,1) == name) {
+            return root.substring(0,1) + "♮";
+        }
+
+        // at the stage, only the naturals should be left, with no special treatment
+        return name;
+    }
+
+    pr.get_note_name = function(name, root) {
+        let names = name.split("/");
+        names = names.map(e => e.trim());
+
+        if (root == undefined)
+        {
+            if (name.includes("/")) {
+                for(let i = 0; i < 2; i++) {
+                    const newNote = DEFAULT_ACCIDENTALS.find(x => x == names[i]);
+                    if (newNote) {
+                        return newNote;
+                    }
+                }
+            } 
+            return name;
+        }
+        if (typeof root !== "string" && !(root instanceof String))
+            root = root.name;
+        return pr.build_accidental(names, pr.get_note_name(root));
+    }
+
     // convert a tone to a variable name (within an octave, so all C's are the same)
     pr.note_to_varname = function(note) {
-        varname = note.name.replace("/", "").replace(" ","").replace("#","s").replace(" ","_");
+        varname = note.name.replace("/", "").replace(" ","").replace("♯","s").replace("♭","b").replace(" ","_");
         return `var_${varname}`;
     }
 
@@ -121,7 +202,7 @@ velato.programbuilder = {};
     pr.update_root = function(new_root) {
         pr.root_note = new_root;
         root_display = document.getElementById("rootNote");
-        root_display.innerText = new_root.name;
+        root_display.innerText = pr.get_note_name(new_root.name);
     }
 
     // if there's an error in the command, we print it, and reset the command, so the
@@ -477,7 +558,7 @@ velato.programbuilder = {};
         // check for root note first, as interval() will fail without it
         if (pr.root_note === null) { // we don't have a current root note
             pr.update_root(note);
-            pr.complete_line("<span class=\"cmt\">// set root note to " + note.name + "</span>");
+            pr.complete_line("<span class=\"cmt\">// set root note to " + pr.get_note_name(note.name) + "</span>");
             pr.reset_line(); // clear everything
             return;
         }

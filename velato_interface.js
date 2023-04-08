@@ -4,22 +4,37 @@ velato.notelist = [];
 
 var velato_interface = function () {
 
-    // set-up
-
-    var audioContext = new AudioContext();
-
-    console.log("Audio is starting up ...");
-
     let SAMPLE_MS = 200; // number of milliseconds before re-sampling
     let SPACE_BETWEEN_NOTES = 1; // This times SAMPLE_MS sets how much time we need before a note is considered the next one
     let MIN_LENGTH_OF_NOTE = 2; // This times SAMPLE_MS is how long a note must be sounded before it is considered intentional
-
-    let input = null; // the listener
 
     const BUILTINS = 
         "const output = document.getElementById('output');\n" +
         "function print(content) { output.innerText += content; } \n\n";
 
+    const NOTE_TRANSLATIONS = {
+        0: "root",
+        1: "2nd",
+        2: "2nd",
+        3: "3rd",
+        4: "3rd",
+        5: "4th",
+        6: "5th",
+        7: "5th",
+        8: "6th",
+        9: "6th",
+        10: "7th",
+        11: "7th"
+    }
+
+    var is_stopped = false; // whether we are currently in a stopped state
+
+    let input = null; // the listener
+
+    var audioContext = new AudioContext();
+
+
+    console.log("Audio is starting up ...");
 
     if (!navigator.getUserMedia)
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
@@ -49,7 +64,16 @@ var velato_interface = function () {
     }
 
     function load_notes(pitch) {
-        console.log("loading json file of notes");
+        console.log("loading json files for freqs and keys");
+
+        // load circle of fiths
+        var req_fifth = new XMLHttpRequest();
+        req_fifth.overrideMimeType("application/json");
+        req_fifth.open('GET', "key_signatures.json", true);
+        req_fifth.onload  = function() {
+            key_list = JSON.parse(req_fifth.responseText);
+        };
+        req_fifth.send(null);
 
         // load list of notes
         var req = new XMLHttpRequest();
@@ -93,8 +117,6 @@ var velato_interface = function () {
         load_notes(pitch_detect)
         close_loading_model();
     }
-
-    is_stopped = false;
 
     function stopevent() {
         stop(false);
@@ -227,9 +249,10 @@ var velato_interface = function () {
             if (currNote.notes > MIN_LENGTH_OF_NOTE) {
                 program = document.getElementById("notes");
                 curr_cmd_notes = document.getElementById("curr_cmd_notes");
-                program.innerHTML = program.innerHTML + `${currNote.name} ${currNote.octave}<br/>`;
+                currnote_name = velato.programbuilder.get_note_name(currNote.name);
+                program.innerHTML = program.innerHTML + `${currnote_name} ${currNote.octave}<br/>`;
                 program.scrollTop = program.scrollHeight;
-                curr_cmd_notes.innerHTML += "<br>" + currNote.name;
+                curr_cmd_notes.innerHTML += "<br>" + currnote_name;
 
                 var err = document.getElementById("error");
                 // register it in the program
@@ -249,24 +272,10 @@ var velato_interface = function () {
             currNoteOut.innerHTML = "";
         }
     }
-
-    var note_translations = {
-        0: "root",
-        1: "2nd",
-        2: "2nd",
-        3: "3rd",
-        4: "3rd",
-        5: "4th",
-        6: "5th",
-        7: "5th",
-        8: "6th",
-        9: "6th",
-        10: "7th",
-        11: "7th"
-    }
    
     function process_note(note, noteset) {
         // A note enters here when it is in range of whistlers
+
         if (currNote !== null && numNulls < SPACE_BETWEEN_NOTES + 1) {
             // in the same note
             currNote.totFreq += note.actual_frequency;
@@ -289,14 +298,18 @@ var velato_interface = function () {
             numNulls = 0;
         }
         currNoteOut = document.getElementById("currNote");
-        currNoteOut.innerHTML = `${currNote.name}`; // ${currNote.octave}`;
+
+        // Get correct name for the note
+        note_name = velato.programbuilder.get_note_name(currNote.name, velato.programbuilder.root_note);
+
+        currNoteOut.innerHTML = note_name;
 
         if (velato.programbuilder.root_note != null) {
             root_idx = velato.programbuilder.root_note.index;
             while (root_idx > currNote.index)
                 root_idx -= 12;
             interval = (currNote.index - root_idx) % 12;
-            interval_name = note_translations[interval];
+            interval_name = NOTE_TRANSLATIONS[interval];
             currNoteOut.innerHTML += ` (${interval_name})`
         }
     }

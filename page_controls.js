@@ -35,7 +35,7 @@ function poll_for_update_root() {
 
         // is this the first note of the program or a new key?
         if (key != curr_note || rootNotSet) {
-            console.log("set root note to " + curr_note);
+            console.log("set root note to " + velato.programbuilder.get_note_name(curr_note));
             key = curr_note;
             rootNotSet = false;
 
@@ -55,10 +55,10 @@ function poll_for_update_root() {
                 note_name = "";
                 for (let j = 0; j < note_set.length;j++) {
                     note_name += " ";
-                    if (j > 0) note += "or ";
-                    note_name += velato.notelist[rootnote_idx + note_set[j]].name;
+                    if (j > 0) note_name += "or ";
+                    note_name += velato.programbuilder.get_note_name(velato.notelist[rootnote_idx + note_set[j]].name, curr_note);
                 }
-                notes_to_list[i].querySelector(".pitch").innerText = note_name;
+                notes_to_list[i].querySelector(".pitch").innerText = velato.programbuilder.get_note_name(note_name);
             }
         }   
     }
