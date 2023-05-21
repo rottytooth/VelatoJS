@@ -1,2 +1,3 @@
 # VelatoJS
- Velato for the browser
+ A hands-free programming language where you generate JavaScript by whistling
+ 

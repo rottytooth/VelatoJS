@@ -1,8 +1,18 @@
-// const audioContext = new AudioContext();
 
 velato.notelist = [];
 
 var velato_interface = function () {
+
+    /*
+     * Velato Interface is responsible for:
+     *
+	 * audio stream from the user
+	 * processing each pitch, marking beginning and end
+     * determining a note's final pitch, to be sent to velato.programbuilder
+     * 
+     * it writes directly to some divs (e.g. currNote)
+     * 
+     */
 
     let SAMPLE_MS = 200; // number of milliseconds before re-sampling
     let SPACE_BETWEEN_NOTES = 1; // This times SAMPLE_MS sets how much time we need before a note is considered the next one
@@ -64,16 +74,7 @@ var velato_interface = function () {
     }
 
     function load_notes(pitch) {
-        console.log("loading json files for freqs and keys");
-
-        // load circle of fiths
-        var req_fifth = new XMLHttpRequest();
-        req_fifth.overrideMimeType("application/json");
-        req_fifth.open('GET', "key_signatures.json", true);
-        req_fifth.onload  = function() {
-            key_list = JSON.parse(req_fifth.responseText);
-        };
-        req_fifth.send(null);
+        console.log("Loading json files for freqs and keys");
 
         // load list of notes
         var req = new XMLHttpRequest();
@@ -183,14 +184,15 @@ var velato_interface = function () {
        modal_content.style.display = "none";
     }
 
-    window.onload = function() {
+    window.addEventListener("load", function() {
+
         document.getElementById("stop").onclick = stopevent;
         document.getElementById("restart").onclick = reset_program;
         document.getElementById("remove").onclick = remove_last_note;
 
         document.getElementById("modal").onclick = close_modal;
         document.getElementById("close").onclick = close_modal;
-    }
+    });
 
 
     function write(text, bolded = false) {

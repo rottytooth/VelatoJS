@@ -39,6 +39,25 @@ velato.programbuilder = {};
     let _building_char = false; // building a char (needs to close out the fromCharCode() call)
     let _building_float = false; // building a floating point number
 
+
+    // load command notes
+    var req_cmd_notes = new XMLHttpRequest();
+    req_cmd_notes.overrideMimeType("application/json");
+    req_cmd_notes.open('GET', "command_notes.json", true);
+    req_cmd_notes.onload  = function() {
+        pr.cmd_list = JSON.parse(req_cmd_notes.responseText);
+
+        // call draw_tones when both command notes are loaded and page is loaded
+        if (document.readyState == 'complete') 
+            draw_tones(pr.cmd_list);
+        else
+            window.addEventListener("load", function() {
+                draw_tones(pr.cmd_list);
+            });
+    };
+    req_cmd_notes.send(null);
+    
+
     // Build the list of all twelve tones
     // NOTE: this is called from outside and must be called before add_note() is used
     pr.create_notelist = function(noteset) {

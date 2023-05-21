@@ -1,0 +1,252 @@
+{
+"Cmd": {
+    "2nd": {
+        "type": "token",
+        "name": "SetRoot",
+        "desc": "Set Root Note",
+        "children": ["Tone"]
+    },
+    "3rd": {
+        "type": "token",
+        "name": "Let",
+        "children": [
+            {"type": "Tone",
+            "desc": "Tone corresponding to a variable"},
+            {"type": "Exp",
+            "desc": "Expression"}            
+        ]
+    },
+    "4th": {
+        "type": "token",
+        "name": "Declare",
+        "children": [
+            {"type": "Tone",
+            "desc": "Tone corresponding to a variable"}
+        ]
+    },
+    "root": {
+        "type": "category",
+        "desc": "Blocks (root)",
+        "root": {
+            "root": {
+                "type": "token",
+                "name": "EndProgram",
+                "desc": "End Program"
+            }
+        },
+        "2nd": {
+            "type": "token",
+            "name": "While",
+            "children": [
+                {"type": "Cmd*",
+                "desc": "Child Commands"}
+            ],
+            "end": "EndBlock"
+        },
+        "3rd": {
+            "type": "token",
+            "name": "EndBlock",
+            "desc": "End Block"
+        },
+        "5th": {
+            "type": "token",
+            "name": "If",
+            "children": [
+                {"type": "Exp",
+                "desc": "Expression"},
+                {"type": "Cmd*",
+                "desc": "Child Commands"}
+            ],
+            "end": "EndBlock"
+        },
+        "6th": {
+            "type": "token",
+            "name": "Else",
+            "children": [
+                {"type": "Cmd*",
+                "desc": "Child Commands"}
+            ],
+            "end": "EndBlock"
+        }
+    },
+    "6th": {
+        "type": "category",
+        "desc": "I/O (6th)",
+        "4th": {
+            "type": "token",
+            "name": "Input",
+            "children": [
+                {"type": "Exp",
+                "desc": "Expression"}
+            ]
+        },
+        "5th": {
+            "type": "token",
+            "name": "Print",
+            "children": [
+                {"type": "Exp",
+                "desc": "Expression"}
+            ]
+        }
+    },
+    "7th": {
+        "type": "token",
+        "name": "Undo",
+        "desc": "Undo Last Command"
+    }
+},
+"Exp": {
+    "6th": {
+        "desc": "Procedural (6th)",
+        "2nd": {
+            "type": "token",
+            "name": "CloseParens",
+            "desc": ")",
+            "note": "This ends all expressions"
+        },
+        "6th": {
+            "type": "token",
+            "name": "OpenParens",
+            "desc": "("
+        }
+    },
+    "root": {
+        "type": "category",
+        "desc": "Value (1st / root)",
+        "2nd": {
+            "type": "token",
+            "name": "Variable",
+            "children": [
+                {"type": "Tone",
+                "desc": "Tone corresponding to that variable"}
+            ]
+        },
+        "3rd": {
+            "type": "token",
+            "name": "NegativeInt",
+            "desc": "Negative Int",
+            "children": [
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark end of int"}
+            ]
+        },
+        "4th": {
+            "type": "token",
+            "name": "Char",
+            "desc": "Char (Unicode)",
+            "children": [
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark end of int"}
+            ]
+        },
+        "5th": {
+            "type": "token",
+            "name": "PositiveInt",
+            "desc": "Positive Int",
+            "children": [
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark end of int"}
+            ]
+        },
+        "6th": {
+            "type": "token",
+            "name": "PositiveFloat",
+            "desc": "Positive Fifth",
+            "children": [
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark decimal"},
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark end of float"}
+            ]
+        },
+        "7th": {
+            "type": "token",
+            "name": "NegativeFloat",
+            "desc": "Negative Fifth",
+            "children": [
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark decimal"},
+                {"type": "NonFifthTone*",
+                "desc": "Single note for each digit, avoiding 5th"},
+                {"type": "Fifth",
+                "desc": "Fifth to mark end of float"}
+            ]
+        }
+    },
+    "3rd": {
+        "type": "category",
+        "desc": "Conditional (3rd)",
+        "2nd": {
+            "type": "token",
+            "name": "Equality",
+            "desc": "Equality (==)"
+        },
+        "3rd": {
+            "type": "token",
+            "name": "GreaterThan",
+            "desc": "Greater Than (&gt;)"
+        },
+        "4th": {
+            "type": "token",
+            "name": "LessThan",
+            "desc": "Less Than (&lt;)"
+        },
+        "5th": {
+            "type": "token",
+            "name": "Not",
+            "desc": "NOT"
+        },
+        "6th": {
+            "type": "token",
+            "name": "And",
+            "desc": "AND"
+        },
+        "7th": {
+            "type": "token",
+            "name": "Or",
+            "desc": "OR"
+        }
+    },
+    "5th": {
+        "type": "category",
+        "desc": "Math",
+        "2nd": {
+            "type": "token",
+            "name": "Subtract",
+            "desc": "-"
+        },
+        "3rd": {
+            "type": "token",
+            "name": "Add",
+            "desc": "+"
+        },
+        "4th": {
+            "type": "token",
+            "name": "Divide",
+            "desc": "/"
+        },
+        "5th": {
+            "type": "token",
+            "name": "Multiply",
+            "desc": "*"
+        },
+        "6th": {
+            "type": "token",
+            "name": "Modulus",
+            "desc": "%"
+        }        
+    }
+}
+}
