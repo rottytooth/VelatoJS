@@ -5,9 +5,14 @@ velato.programbuilder = {};
 
 // velato.programbuilder
 (function(pr) {
-    pr.program_text = ""; // the entire text of the js program we're building
-    pr.curr_token = []; // intervals for the current word (a command, expression, or number we are building)
-    pr.curr_line = ""; // the current line of code we're building (in JS)
+    pr.beginning_program = '<span class="str">"use strict"</span>;';
+    pr.program_text = pr.beginning_program; // the entire text of the js program we're building
+
+    _lex_stack = []; // lexemes (intervals) building toward a token. Always for a single command or expression at a time
+    _cmd_stack = []; // cmd tokens that have opened (but not yet closed)
+    _exp_stack = []; // exp tokens yet to be processed. Always for a single commmand at a time. These are processed bottom-up, not up-down like _cmd_stack
+
+    // pr.curr_line = ""; // the current line of code we're building (in JS)
     pr.root_note = null; // the current root note which we use to compare intervals
     pr.notelist = []; // a list of one octave of notes, used as reference to calculate intervals
 
@@ -28,31 +33,30 @@ velato.programbuilder = {};
         }
     };
 
-    // Flags for the type of input we're dealing with (expression, digit, etc)
-    // and for where we are in the program stack.
-    // These capture the current state of the program input.
-    let _building_expression= false; // we are about to begin an expression or are building one
-    let _building_expression_childcommands = false; // we are building an expression and will then build child commands, such as in while (expression) { childcommands }
-    let _stackdepth = 0; // how deep we are in commands {}. We need "end block" commands to break out of each
-    let _parensdepth = 0; // for expressions; all expressions start with a ( which is implied, and end with an explicit )
-    let _building_int = false; // building an integer
-    let _building_char = false; // building a char (needs to close out the fromCharCode() call)
-    let _building_float = false; // building a floating point number
+    pr.note_translations = {
+        "root" : [0],
+        "2nd" : [1,2],
+        "3rd" : [3,4],
+        "4th" : [5],
+        "5th" : [6,7],
+        "6th" : [8,9],
+        "7th" : [10,11]
+    }
 
 
     // load command notes
     var req_cmd_notes = new XMLHttpRequest();
     req_cmd_notes.overrideMimeType("application/json");
-    req_cmd_notes.open('GET', "command_notes.json", true);
+    req_cmd_notes.open('GET', "lexicon.json", true);
     req_cmd_notes.onload  = function() {
-        pr.cmd_list = JSON.parse(req_cmd_notes.responseText);
+        pr.lexicon = JSON.parse(req_cmd_notes.responseText);
 
         // call draw_tones when both command notes are loaded and page is loaded
         if (document.readyState == 'complete') 
-            draw_tones(pr.cmd_list);
+            draw_tones(pr.lexicon);
         else
             window.addEventListener("load", function() {
-                draw_tones(pr.cmd_list);
+                draw_tones(pr.lexicon);
             });
     };
     req_cmd_notes.send(null);
@@ -145,16 +149,6 @@ velato.programbuilder = {};
         return `var_${varname}`;
     }
 
-    _print_output = function() {
-        var program = document.getElementById("program_txt");
-        program.innerHTML = pr.program_text + pr.curr_line;
-//        hljs.highlightAll(); // highlight.js 
-        _clear_err();
-        pr.curr_token = []; // if we're updating, there is a new token to print, meaning we should clear this
-        var curr_cmd_notes = document.getElementById("curr_cmd_notes");
-        curr_cmd_notes.innerHTML = "";
-    }
-
     _dress = function(desc, exp) {
         var cmd = document.getElementById("curr_cmd_notes");
         style = 'desc';
@@ -167,55 +161,60 @@ velato.programbuilder = {};
         errs.innerHTML = "";
     }
 
-    // prints current line and resets it
-    pr.complete_line = function(line) {
-        for (let i = 0; i < _stackdepth; i++) {
-            pr.program_text += "\t";
-        }
-        pr.program_text += line + "\n";
-
-        pr.reset_line();
-
-        _clear_err(); // clear any errors from the previous line
-
-        // update on screen
-        _print_output();
+    _clear_cmd_box = function() {
+        var curr_cmd_notes = document.getElementById("curr_cmd_notes");
+        curr_cmd_notes.innerHTML = "";
     }
 
-    // reset the text of code for the current line, the set of tones, and all the flags
-    pr.reset_line = function() {
-        pr.curr_line = "";
-        pr.curr_token = [];
-        _parensdepth = 0; // parens are always on the same line -- if the user enters an invalid note, we need to close these all out
+    pr.remove_last_line = function() {
+        loc = pr.program_text.lastIndexOf("\n");
+        pr.program_text = pr.program_text.substring(0, loc);
 
-        //reset flags
-        _building_expression= false;
-        _building_expression_childcommands = false;
-        _building_int = false;
-        _building_char = false;
-        _building_float = false;
+        // update on screen
+        let program = document.getElementById("program_txt");
+        program.innerHTML = pr.program_text;
+    }
 
-        _print_output(); // may be redundent
+    // prints current line of js and resets it
+    pr.print = function(text, newline=false) {
+
+        if (newline) {
+            if (pr.program_text.length > 0)
+                pr.program_text += "\n";
+            for (let i = 0; i < _cmd_stack.length-1; i++) {
+                pr.program_text += "\t";
+            }
+        }
+
+        pr.program_text += text;
+
+        // update on screen
+        let program = document.getElementById("program_txt");
+        program.innerHTML = pr.program_text;
+
+
     }
 
     pr.reset_program = function() {
-        pr.reset_line();
         _stackdepth = 0;
         root_display = document.getElementById("rootNote");
         root_display.innerText = "";
         pr.root_note = null;
         key = "C";
-        _print_output();
-    }
+        pr.print();
 
-    pr.remove_last_note = function() {
-        pr.reset_line();
-        _print_output();
+        pr.program_text = pr.beginning_program;
     }
 
     // format a string for the note
     pr.format_note = function(note) {
         return `${note.name} ${note.octave}`;
+    }
+
+    pr.reset_line = function() {
+        _lex_stack = [];
+        var curr_cmd_notes = document.getElementById("curr_cmd_notes");
+        curr_cmd_notes.innerHTML = "";
     }
 
     pr.update_root = function(new_root) {
@@ -226,343 +225,95 @@ velato.programbuilder = {};
 
     // if there's an error in the command, we print it, and reset the command, so the
     // programmer can try again
-    _throw_error = function(msg) {
-        pr.reset_line();
+    _throw_error = function(msg, syntax) {
+        // pr.reset_line();
         if (msg == null || msg == "") {
             msg = "Could not determine command"; // default syntax error
         }
-        throw(`SYNTAX ERROR : ${msg}`);
+        if (syntax)
+            throw(`SYNTAX ERROR : ${msg}`);
+        else
+            throw(`INTERNAL ERROR : ${msg}`);
     }
 
     // add an expression to the current line and clear expression tones
     // does not clear flags, only the current word
     _add_exp = function(exp) {
         pr.curr_line += exp + " ";
-        pr.curr_token = [];
-        _print_output();
+        _lex_stack = [];
+        pr.print();
     }
 
-    _interpret_digit = function(digit) {
-        // check if we're at the end
-        if (digit == 6 || digit == 7) { // if we've hit a Fifth
-            if (_building_float) {
-                _add_exp("."); // we're in a float, add decimal point
-                _building_float = false;
-                _building_int = true; // treat the rest as if we're building an int
-            }
-            else { 
-                if (_building_char) _add_exp("</span><span class=\"oper\">)</span>"); // closes out the tochar()
-
-                // we're done with this number
-                _building_char = false;
-                _building_int = false;
-                _add_exp("</span>");
-            }
-        } else {
-            if (digit > 7) digit -= 2; // if higher than a Fifth, subtract offset
-            pr.curr_line += digit; // add digit to number
-        }
-        _print_output();
+    // print instruction for next item we're expecting
+    _notate_child = function(cmd, expnum) {
+        _dress(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
     }
 
-    _activate_expression_mode = (then_commands) => {
-        if (then_commands)
-            _building_expression_childcommands = true;
-        else
-            _building_expression = true;
+    // build toward a command
+    pr.check_cmd_token = function() {
+        g = pr.lexicon["Cmd"];
 
-        _dress("expression mode", true);
+        for(let i = 0; i < _lex_stack.length; i++) {
+            if (g[_lex_stack[i].interval] === undefined) {
+                pr.reset_line();
+                _throw_error("Invalid note sequence, resetting line", true);
+            }
+            g = structuredClone(g[_lex_stack[i].interval]);
+            if ("type" in g && g["type"] == "token") {
+
+                if (g["name"] == "SetRoot") {
+                    // special handling for SetRoot and Undo
+                    pr.root_note = null;
+                } else if (g["name"] == "EndBlock") {
+                    // add } to program
+                    _cmd_stack.pop(); // pop the last command
+                    _clear_cmd_box(); // done with command
+                } else if (g["children"] || g["childCmds"]) {
+                    //  if it requires child commands, keep it in the command stack
+                    _cmd_stack.push(g);
+
+                    // and if it has child expressions, put them in the expression stack
+                    if (_exp_stack.length > 0) {
+                        _throw_error("trying to add expressions when expression list already occupied");
+                    }
+                    _exp_stack.push.apply(_exp_stack, g["children"]);
+                    _notate_child(g, 0);
+                } else {
+                    // otherwise, process it right away
+
+                    _clear_cmd_box(); // done with command
+                }
+
+                // print if it has something to print
+                if (g["print"])
+                    pr.print(g["print"], true);
+                else
+                    pr.print('', true); // create blank
+                
+                // reset lexemes
+                _lex_stack = [];
+            }
+        }
     }
 
-    _interpret_expression = function(note) {
+    // build toward an expression
+    pr.check_exp_token = function() {
+        g = pr.lexicon["Exp"];
 
-        // in case we get to more than 3 chars -- this should never fire
-        if (pr.curr_token.length > 3) {
-            _throw_error("expression too long and not resolved");
-        }
+        for(let i = 0; i < _lex_stack.length; i++) {
+            g = g[_lex_stack[i].interval];
+            if ("type" in g && g["type"] == "token") {
 
-        if (pr.curr_token.length == 1) {
-            switch(pr.curr_token[0]) {
-                case 0:
-                    _dress("variable or value");
-                    break;
-                case 3:
-                case 4:
-                    _dress("conditional");
-                    break;
-                case 6:
-                case 7:
-                    _dress("algebraic symbol");
-                    break;
-                case 8:
-                case 9:
-                    _dress("parentheses");
-                    break;
-
-            }
-        }
-
-        if (pr.curr_token.length == 2) {
-            switch(pr.curr_token[0]) {
-                case 0: // root "value"
-                    switch(pr.curr_token[1]) {
-                        case 1:
-                        case 2:
-                            _dress("variable");
-                            break;
-                        case 3:
-                        case 4: // third "negative int"
-                            _dress("negative int");
-                            _dress("int creation mode, ends with a 5th");
-                            _add_exp("<span class=\"oper\">-</span><span class=\"num\">");
-                            _building_int = true;
-                            return;
-                        case 5: // fourth "char"
-                            _dress("char");
-                            _dress("char creation mode, ends with a 5th");
-                            _add_exp("<span class=\"var\">String</span><span class=\"oper\">.</span><span class=\"var\">fromCharCode</span><span class=\"oper\">(</span><span class=\"num\">");
-                            _building_char = true;
-                            return;
-                        case 6:
-                        case 7: // fifth "positive int"
-                            _dress("positive int");
-                            _dress("int creation mode, ends with a 5th");
-                            _add_exp("<span class=\"num\">");
-                            _building_int = true;
-                            return;
-                        case 8:
-                        case 9: // sixth "positive double"
-                            _dress("positive float");
-                            _dress("float creation mode, first 5th indicates decimal, second ends number");
-                            _add_exp("<span class=\"num\">");
-                            _building_float = true;
-                            return;
-                        case 10: // seventh "negative double"
-                            _dress("negative float");
-                            _dress("float creation mode, first 5th indicates decimal, second ends number");
-                            _add_exp("<span class=\"oper\">-</span><span class=\"num\">");
-                            _building_float = true;
-                            return;
-                        // don't throw error, expression might be more than 2 letters
-                    }
-                    break;
-                case 3:
-                case 4: // third "conditional"
-                    switch(pr.curr_token[1]) {
-                        case 1:
-                            _add_exp("<span class=\"oper\">==</span>");
-                            return;
-                        case 3:
-                        case 4: // third "greater than"
-                            _add_exp("<span class=\"oper\">&gt;</span>");
-                            return;
-                        case 5: // fourth "less than"
-                            _add_exp("<span class=\"oper\">&lt;</span>");
-                            return;
-                        case 6:
-                        case 7: // fifth "not"
-                            _add_exp("<span class=\"oper\">!</span>");
-                            return;
-                        case 8:
-                        case 9: // sixth "and"
-                            _add_exp("<span class=\"oper\">&&</span>");
-                            return;
-                        case 10:
-                        case 11: // seventh "or"
-                            _add_exp("<span class=\"oper\">||</span>");
-                            return;
-                    }
-                    break;
-                case 6:
-                case 7: // Fifth, math
-                    switch(pr.curr_token[1]) {
-                        case 3:
-                        case 4: // third "+"
-                            _add_exp("<span class=\"oper\">+</span>");
-                            return;
-                        case 1:
-                        case 2: // second "-"
-                            _add_exp("<span class=\"oper\">-</span>");
-                            return;
-                        case 6:
-                        case 7: // fifth "*"
-                            _add_exp("<span class=\"oper\">*</span>");
-                            return;
-                        case 5: // fourth "/"
-                            _add_exp("<span class=\"oper\">/</span>");
-                            return;
-                        case 8:
-                        case 9: // sixth mod
-                            _add_exp("<span class=\"oper\">%</span>");
-                            return;
-                    }
-                case 8:
-                case 9: // sixth "procedural"
-                    switch (pr.curr_token[1]) {
-                        case 8:
-                        case 9: // sixth "("
-                            _add_exp("<span class=\"oper\">(</span>");
-                            _parensdepth++;
-                            return;
-                        case 1:
-                        case 2: // second ")"
-                            pr.curr_line += "<span class=\"oper\">)</span>";
-                            _parensdepth--; // closed a parentheses set
-                            if (_parensdepth == 0) { // we're at the end of an expression
-
-                                _building_expression = false; 
-
-                                // if we are not in a block that is going straight from expression to command, add the closing semicolon
-                                if (!_building_expression_childcommands) {
-                                    pr.curr_line += "<span class=\"oper\">;</span>";
-                                    pr.complete_line(pr.curr_line);
-                                } else {
-                                    _building_expression_childcommands = false;
-                                    pr.curr_line += "<span class=\"oper\"> {</span>";
-                                    pr.complete_line(pr.curr_line);
-                                    _stackdepth++;
-                                }
-                                return;
-                            } // we're done with expression
-                    }
-            }
-        }
-
-        if (pr.curr_token.length == 3) {
-            switch(pr.curr_token[0]) {
-                case 0:
-                    switch(pr.curr_token[1]) {
-                        case 1:
-                        case 2: // second "var"
-                            _add_exp(pr.note_to_varname(note));
-                            break;    
-                    }
-                    break;
-                default: // we're three notes in and don't yet know what this is
-                    _throw_error();
-            }
-        }        
-    }
-
-    _interpret_command = function(note) {
-
-        console.log(`Root Note: ${pr.format_note(pr.root_note)}, Intervals: ${pr.curr_token}`);
-
-        if (pr.curr_token.length == 1) {
-            switch (pr.curr_token[0]) {
-                case 0:
-                    _dress("blocks / loops");
-                    break;
-                case 1:
-                case 2: // second "root note change"
-                    pr.root_note = null; // will trigger reset of root_note
-                    _dress("new root_note");
-                    break;
-                case 3:
-                case 4:
-                    _dress("let (assignment)");
-                    break;
-                case 5:
-                    _dress("declare");
-                    break;
-                case 8:
-                case 9:
-                    _dress("i/o");
-                    break;
-                case 10:
-                case 11: // seventh "undo last"
-                    // this removes the last note but almost certainly doesn't work in a number of cases
-                    //FIXME: This should be undoing a complete command, not a note
-                    pr.curr_token = pr.curr_token.slice(0, pr.curr_token.length-1);
-                    _dress("undoing last note");
-                    pr.complete_line("");
-                    return;
-            }
-        }
-
-        if (pr.curr_token.length == 2) {
-            switch(pr.curr_token[0]) {
-                case 0: // unison / root / 1st "block"
-                    switch(pr.curr_token[1]) {
-                        case 1:
-                        case 2: // second "while"
-                            pr.curr_line = "<span class=\"key\">while</span><span class=\"oper\">(</span>";
-                            _print_output();
-                            _parensdepth++;
-                            _building_expression_childcommands = true;
-                            _activate_expression_mode(true);
-                            return;
-                        case 3: 
-                        case 4: // third "end block"
-                            if (_stackdepth == 0) {
-                                _print_output();
-                                _throw_error("no block to close out of");
-                            }
-                            pr.complete_line("<span class=\"oper\">}</span>");
-                            _stackdepth--;
-                            return;
-                        case 6:
-                        case 7: // fifth "if"
-                            pr.curr_line = "<span class=\"key\">if</span><span class=\"oper\">(</a>";
-                            _print_output();
-                            _parensdepth++;
-                            _activate_expression_mode(true);
-                            return;
-                        case 8:
-                        case 9: // sixth "else"
-                            pr.complete_line("<span class=\"oper\">}</span> <span class=\"key\">else</span> <span class=\"oper\">{</span>");
-                            return;
-                    }
-                    break;
-                case 3:
-                case 4: // third "let"
-                    pr.curr_line += pr.note_to_varname(note) + "<span class=\"oper\"> = (</span>";
-                    _print_output();
-                    _parensdepth++;
-                    _activate_expression_mode();
-                                    break;
-                case 5: // fourth "declare"
-                    pr.complete_line("<span class=\"key\">var</span> <span class=\"def\">" + pr.note_to_varname(note) + "</span><span class=\"oper\">;</span>");
-                    break;
-
-                case 8:
-                case 9: // sixth "special commands"
-                    switch(pr.curr_token[1]) {
-                        case 6:
-                        case 7: // fifth "print"
-                            pr.curr_line = "<span class=\"var\">print</a><span class=\"oper\">(</span>";
-                            _print_output();
-                            _parensdepth++;
-                            _activate_expression_mode();
-                            return;
-                    }
-                    break;
-            }
-        }
-
-        // it takes three notes to end the program
-        if (pr.curr_token.length == 3) {
-            if (pr.curr_token[0] == 0 && pr.curr_token[1] == 0 && pr.curr_token[2] == 0) {
-                pr.complete_line("<span class=\"cmt\">// completed program</span>");
-                _print_output();
-                return true; // program is complete
-            }
-        }
-
-        if (pr.curr_token.length == 4) {
-            switch(pr.curr_token[0]) {
-                case 8:
-                case 9: // sixth "special commands"
-                    switch(pr.curr_token[1]) {
-                        case 5: // fourth "input"
-                            pr.complete_line(`${pr.note_to_varname(note)} = <span class=\"var\">window</span><span class=\"oper\">.</span><span class=\"var\">input</span><span class=\"oper\">();</span>`);
-                            return;
-                        default:
-                            _throw_error();
-                    }
-                    break;
-                default: // if we've made it to four notes and don't have a resolution, it's an error
-                    _throw_error();
+                if (g["name"] == "CloseParens") {
+                    // we are ending the expression block
+                    // _cmd_stack[cmd_stack.length-1]
+                } else {
+                    // otherwise, process it right away
+                    pr.print(g["print"]);
+                }
+                
+                // reset lexemes
+                _lex_stack = [];
             }
         }
     }
@@ -571,37 +322,50 @@ velato.programbuilder = {};
     // and, if the command is complete, add to the final program
     pr.add_tone = function(note) {
         if (pr.notelist.length == 0) {
-            _throw_error("The note list needs to be set before calling pr.add_tone");
+            _throw_error("The note list needs to be set before calling pr.add_tone", true);
         }
 
         // check for root note first, as interval() will fail without it
         if (pr.root_note === null) { // we don't have a current root note
             pr.update_root(note);
-            pr.complete_line("<span class=\"cmt\">// set root note to " + pr.get_note_name(note.name) + "</span>");
-            pr.reset_line(); // clear everything
+            pr.print("<span class=\"cmt\">// set root note to " + pr.get_note_name(note.name) + "</span>", true);
+            _clear_cmd_box(); // done with command
             return;
         }
 
-        pr.curr_token.push(pr.interval(pr.root_note, note));
+        note.interval_semitones = pr.interval(pr.root_note, note);
+        note.interval = Object.keys(pr.note_translations).find(key => pr.note_translations[key].includes(note.interval_semitones)) 
+        note.root = pr.root_note;
+        _lex_stack.push(note);
 
         console.log("registering " + pr.format_note(note));
         if (pr.root_note != null)
             console.log("Root Note: " + pr.format_note(pr.root_note));
 
-        // if we're building a number right now
-        if (_building_int || _building_float || _building_char) {
-            _interpret_digit(pr.curr_token[pr.curr_token.length - 1]);
-            return;
-        }
+        // if the open command has children (that are not other commands), address those first
+        if (_cmd_stack.length > 0 && _exp_stack.length > 0) {
+            // we are processing this thing
+            switch(_exp_stack[0].type) {
+                case "NonFifthTone*": // a series of non-fifths until a fifth is sounded
+                    break;
+                case "Exp": // add an expression to the stack or complete it
+                    break;
+                case "Tone": // a single tone as identifier
+                    let varname = pr.note_to_varname(note);
+                    pr.print(_exp_stack[0].print.replace("{Tone}",varname));
+                    _exp_stack.shift(); // remove first element of array
+                    break;
+            }
 
-        // if we're in an expression or starting one
-        if (_building_expression|| _building_expression_childcommands) {
-            _interpret_expression(note);
-            return;
+            // if that's the last item in the exp stack, pop the command
+            if (_exp_stack.length == 0) {
+                _clear_cmd_box(); // done with command
+                _cmd_stack.pop();
+            }
+        } else {
+            // otherwise, let's see where we are in building the next command
+            pr.check_cmd_token();
         }
-
-        // otherwise, we are in a command
-        return _interpret_command(note);
 
     }    
     

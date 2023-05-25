@@ -1,4 +1,3 @@
-
 velato.notelist = [];
 
 var velato_interface = function () {
@@ -173,24 +172,27 @@ var velato_interface = function () {
         }
     }
 
-    function remove_last_note() {
-        //TODO: add actual work to remove last note
-    }
-    
-    function close_modal() {
+    function close_modal(e) {
        var modal = document.getElementById("modal");
        var modal_content = document.getElementById("modal");
        modal.style.display = "none";
        modal_content.style.display = "none";
     }
 
+    function block_close_modal(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+    }
+
     window.addEventListener("load", function() {
 
         document.getElementById("stop").onclick = stopevent;
         document.getElementById("restart").onclick = reset_program;
-        document.getElementById("remove").onclick = remove_last_note;
+        document.getElementById("remove").onclick = velato.programbuilder.remove_last_line;
 
         document.getElementById("modal").onclick = close_modal;
+        document.getElementById("modal_content").onclick = block_close_modal;
         document.getElementById("close").onclick = close_modal;
     });
 
@@ -238,7 +240,7 @@ var velato_interface = function () {
                 return;
             }
             if (note.octave > 4 && note.octave < 7) {
-                write(`NOTE: ${note.name} ${note.octave}`, true);
+                write(`<span style="color: var(--focus-emphasis)">NOTE: ${note.name} ${note.octave}</span>`, true);
                 process_note(note, noteset);
             }
             else numNulls++; // an out-of-range sound is a null

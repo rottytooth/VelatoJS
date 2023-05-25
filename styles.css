@@ -1,4 +1,8 @@
 @font-face {
+    font-family: Ubuntu-Light;
+    src: url(fonts/Ubuntu/Ubuntu-Light.ttf);
+}
+@font-face {
     font-family: Ubuntu;
     src: url(fonts/Ubuntu/Ubuntu-Regular.ttf);
 }
@@ -12,13 +16,14 @@
 
 /* global color scheme */
 :root {
-    --main-txt-color: #9EFFFF; /*#0088FF;*/
+    --main-txt-color: #b9b9ba; /*#0088FF;*/
     --txt-emphasis: #52beff;
     --bright-emphasis: #3AD900; /*#9EFFFF;*/
-    --header: #fff;
-    --focus-emphasis: #FF80E1;
-    --panel-back: #013a6c; /*#002240;*/
-    --default-bck: #011a31;
+    --header: #6f6f6f;
+    --focus-emphasis: #dcdcaf;
+    --panel-back: #232327; /*#002240;*/
+    --panel-back-highlight: #49494d;
+    --default-bck: #18181a;
     --line-border: #23536a;
     --error: #ff2121;
     --silence: #52beff; /*#014480;*/
@@ -30,7 +35,7 @@
     --code-operator: #FFFFFF;
     --code-number: #FF80E1;
     --code-comment: #0088FF;
-    --code-keyword: #FFEE80;
+    --code-keyword: #dcdcaf;
     --code-string: #3AD900;
     --code-meta: #FF9D00;
 }
@@ -75,15 +80,15 @@ body, html {
     margin-right: 16px;
     padding-left: 4px;
     padding-right: 4px;
-    /* color: #FF80E1; */
     color: var(--header);
+    vertical-align: middle;
 }
 #header h2 {
     padding-top: 15px;
-    /* font-weight: normal; */
     font-size: 120%;
     display: inline;
     color: var(--main-txt-color);
+    vertical-align: middle;
 }
 #whistling {
     color: var(--txt-emphasis);
@@ -150,10 +155,7 @@ body, html {
     border: 1px solid #999;
 }
 .button:hover {
-    background-color: #ccc;
-}
-.disabled:hover {
-    background-color: #fff;
+    background-color: var(--panel-back-highlight);
 }
 
 #error {
@@ -167,10 +169,14 @@ body, html {
     flex-direction: column
 }
 #notes {
+    padding-top: 5px;
     display: flex;
     flex: 50%;
     overflow-y: auto;
-    flex-direction: column
+    flex-direction: column;
+    line-height: 20pt;
+    padding: 5px;
+    line-height: 26px;
 }
 #curr_cmd_notes {
     display: flex;
@@ -180,11 +186,14 @@ body, html {
     background-color: var(--panel-back);
     font-size: 20px;
     padding: 5px;
+    line-height: 26px;
 }
 #curr_cmd_notes .desc {
+    font-family: Ubuntu-Light;
     color: var(--bright-emphasis);
 }
 #curr_cmd_notes .exp {
+    font-family: Ubuntu-Light;
     color: var(--code-keyword);
 }
 
@@ -308,16 +317,18 @@ body, html {
 	width: 100%;
 	height: 100%;
 	overflow: auto;
-	background-color: rgba(0, 0, 0, .1);
     display: none;
+	background-color: rgba(0, 0, 0, .1);
 }
 
 #modal_content {
 	width: 50%;
-    border: none;
-    background-color: #fbfdfe;
+    border: 2px solid #000;
+    box-shadow: 0px 0px 10px black;
+    background-color: var(--panel-back);
+    color: var(--main-txt-color);
 	margin: auto;
-	padding: 15px;
+	padding: 30px;
 	border-radius: 10px;
 	overflow: hidden;
 	text-align: center;

@@ -52,7 +52,7 @@
         </div>
         <div class="text-program box">
             <div id="js-program">JS Program
-                <pre><code class="language-javascript" id="program_txt"></code></pre>
+                <pre><code class="language-javascript" id="program_txt"><span class="str">"use strict"</span>;</code></pre>
             </div>
             <div id="js-output">Program Output
                 <div id="output"></div>
@@ -77,9 +77,10 @@
         </div>
     </div>
 </div><div id="modal"><div id="modal_content"><span class="close" id='close'>&times;</span>HOW TO WHISTLE A PROGRAM<br/>
-    <p>The input stream to the left shows any sound the interpreter thinks might be a whistle. A note needs to hold for three consecutive appearances in that list before it registers and needs a break of at least one for it to be considered a distinct note. That means that, if you start a note off-key, you can let it drift to the correct pitch before breaking it off; only the last pitch is counted.</p>
-    <p>If you are not sure how to sound a command or expression, try the play buttons in the Lexicon. Most combinations have more than one possibility: the sharp vs flat version (or perfect vs diminished) of an interval. The play button will play both.</p>
-    <p>The whistling of a Velato program gets easier with practice, but if it proves too difficult, Velato also takes a MIDI file as input.</p>
+    <p>First, whistle a single note to set the initial key. Until you change key, all intervals will be in terms of that note.</p>
+    <p>The input stream to the left shows any sound the interpreter thinks might be a whistle. A note needs to hold for more than half a second (three consecutive appearances in the stream) before it registers. It will not register until it breaks off (for at least 200 milliseconds). That means that, if you start a note off-key, you can let it drift to the correct pitch; just hold the final note for a moment.</p>
+    <p>If you are not sure how to sound a command or expression, try the play buttons in the Lexicon. Most combinations have more than one possibility: major/minor or perfect/diminished. The play button will play both.</p>
+    <p>The whistling of a Velato program gets easier with practice, and it may help keep you in tune!</p>
 </div>
 </div>
 </div><div id="loading_modal"><div id="modal_content">LOADING AUDIO STREAM...</div></div>

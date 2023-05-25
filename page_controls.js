@@ -13,16 +13,6 @@ noteset = "";
 
 rootNotSet = true;
 
-var note_translations = {
-    "root" : [0],
-    "2nd" : [1,2],
-    "3rd" : [3,4],
-    "4th" : [5],
-    "5th" : [6,7],
-    "6th" : [8,9],
-    "7th" : [10,11]
-}
-
 function crawl_list(cmds, cmdlistdiv, tone_pattern) {
 
     for (const key in cmds) {
@@ -119,9 +109,9 @@ function poll_for_update_root() {
 
                 // get the interval name
                 note = notes_to_list[i].querySelector(".int").innerText.trim();
-                interval_set = rootnote_idx + note_translations[note.substring(1,note.length-1)];
+                interval_set = rootnote_idx + velato.programbuilder.note_translations[note.substring(1,note.length-1)];
 
-                note_set = note_translations[note.substring(1,note.length-1)];
+                note_set = velato.programbuilder.note_translations[note.substring(1,note.length-1)];
                 
                 note_name = "";
                 for (let j = 0; j < note_set.length;j++) {
@@ -144,10 +134,10 @@ function play_toneset(notes, rootnote_idx, major, now, time_offset) {
     let i = 0;
     // play rest of sequence
     for (i = 0; i < notes.length; i++) {
-        intervals = note_translations[notes[i]];
+        intervals = velato.programbuilder.note_translations[notes[i]];
         if (intervals.length > 1) 
             has_two = true;
-        interval_set = note_translations[notes[i]];
+        interval_set = velato.programbuilder.note_translations[notes[i]];
         interval = (major > 0 && interval_set.length > 1 ? interval_set[major] : interval_set[0]);
         synth.triggerAttackRelease(velato.notelist[rootnote_idx + interval].freq, "8n", now+0.5*(i+time_offset));
     }

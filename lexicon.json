@@ -4,25 +4,35 @@
         "type": "token",
         "name": "SetRoot",
         "desc": "Set Root Note",
-        "children": ["Tone"]
+        "children": [
+            {"type": "Tone",
+            "desc": "tone that will become the new root"}
+        ],
+        "childCmds": false
     },
     "3rd": {
         "type": "token",
         "name": "Let",
         "children": [
             {"type": "Tone",
-            "desc": "Tone corresponding to a variable"},
+            "desc": "tone corresponding to a variable",
+            "print": "<span class='var'>{Tone}</span> = "},
             {"type": "Exp",
-            "desc": "Expression"}            
-        ]
+            "desc": "expression",
+            "print": "{Exp};"}
+        ],
+        "childCmds": false
     },
     "4th": {
         "type": "token",
         "name": "Declare",
+        "print": "<span class='key'>var</span>",
         "children": [
             {"type": "Tone",
-            "desc": "Tone corresponding to a variable"}
-        ]
+            "desc": "tone corresponding to a variable",
+            "print": " <span class='var'>{Tone}</span>;"}
+        ],
+        "childCmds": false
     },
     "root": {
         "type": "category",
@@ -32,41 +42,43 @@
                 "type": "token",
                 "name": "EndProgram",
                 "desc": "End Program"
-            }
+            },
+            "childCmds": false
         },
         "2nd": {
             "type": "token",
             "name": "While",
+            "print": "<span class='key'>while</span> (",
             "children": [
-                {"type": "Cmd*",
-                "desc": "Child Commands"}
+                {"type": "Exp",
+                "desc": "Expression",
+                "print": "{Exp} {"}
             ],
-            "end": "EndBlock"
+            "childCmds": true
         },
         "3rd": {
             "type": "token",
             "name": "EndBlock",
-            "desc": "End Block"
+            "desc": "End Block",
+            "print": "}",
+            "childCmds": false
         },
         "5th": {
             "type": "token",
             "name": "If",
+            "print": "<span class='key'>if</span> (",
             "children": [
                 {"type": "Exp",
-                "desc": "Expression"},
-                {"type": "Cmd*",
-                "desc": "Child Commands"}
+                "desc": "Expression",
+                "print": "{Exp} {"}
             ],
-            "end": "EndBlock"
+            "childCmds": true
         },
         "6th": {
             "type": "token",
             "name": "Else",
-            "children": [
-                {"type": "Cmd*",
-                "desc": "Child Commands"}
-            ],
-            "end": "EndBlock"
+            "childCmds": true,
+            "print": "} else {"
         }
     },
     "6th": {
@@ -118,7 +130,7 @@
             "name": "Variable",
             "children": [
                 {"type": "Tone",
-                "desc": "Tone corresponding to that variable"}
+                "desc": "tone corresponding to a variable"}
             ]
         },
         "3rd": {
@@ -127,9 +139,7 @@
             "desc": "Negative Int",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark end of int"}
+                "desc": "single note for each digit, avoiding 5th"}
             ]
         },
         "4th": {
@@ -138,9 +148,7 @@
             "desc": "Char (Unicode)",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark end of int"}
+                "desc": "Single note for each digit, avoiding 5th"}
             ]
         },
         "5th": {
@@ -149,39 +157,29 @@
             "desc": "Positive Int",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark end of int"}
+                "desc": "single note for each digit, avoiding 5th"}
             ]
         },
         "6th": {
             "type": "token",
             "name": "PositiveFloat",
-            "desc": "Positive Fifth",
+            "desc": "Positive Float",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark decimal"},
+                "desc": "single note for each digit, avoiding 5th"},
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark end of float"}
+                "desc": "single note for each digit, avoiding 5th"}
             ]
         },
         "7th": {
             "type": "token",
             "name": "NegativeFloat",
-            "desc": "Negative Fifth",
+            "desc": "Negative Float",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark decimal"},
+                "desc": "single note for each digit, avoiding 5th"},
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"},
-                {"type": "Fifth",
-                "desc": "Fifth to mark end of float"}
+                "desc": "single note for each digit, avoiding 5th"}
             ]
         }
     },
@@ -221,7 +219,7 @@
     },
     "5th": {
         "type": "category",
-        "desc": "Math",
+        "desc": "Math (5th)",
         "2nd": {
             "type": "token",
             "name": "Subtract",
