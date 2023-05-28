@@ -68,7 +68,6 @@ var velato_audio_interface = function () {
         req.open('GET', "frequencies.json", true);
         req.onload  = function() {
             var noteset = parse_notes(JSON.parse(req.responseText));
-            velato.programbuilder.create_notelist(noteset);
             velato.frequencylist = noteset;
 
             input = setInterval(function() {
@@ -252,16 +251,17 @@ var velato_audio_interface = function () {
 
                 var err = document.getElementById("feedback");
 
+                // FIXME: disabling try/catch for debug
                 // register it in the program
-                try {
+                // try {
                     let is_complete = velato.programbuilder.add_tone(currNote);
                     err.innerText = "";
                     if (is_complete === true) {
                         complete_program();
                     }
-                } catch (e) {
-                    err.innerHTML= `<span class="err">${e}</span>`;
-                }
+                // } catch (e) {
+                //     err.innerHTML= `<span class="err">${e}</span>`;
+                // }
             }
             numNulls = 0;
             currNote = null;

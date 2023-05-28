@@ -7,7 +7,7 @@ window.addEventListener("load", function() {
     synth = new Tone.Synth().toDestination();
 });
 
-key = "C"; // default starting key for example tone generation
+key = new velato.note("C",4,null,null,null); // default starting key for example tone generation
 noteset = "";
 
 rootNotSet = true;
@@ -94,7 +94,7 @@ function poll_for_update_root() {
         root_note = velato.programbuilder.root_note;
 
         // is this the first note of the program or a new key?
-        if (key != root_note.name || rootNotSet) {
+        if (rootNotSet || key != root_note) {
             console.log("set root note to " + root_note.displayname);
             key = root_note;
             rootNotSet = false;

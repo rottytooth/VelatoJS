@@ -258,6 +258,7 @@ body, html {
 .instructions {
     flex: 0 0 250px;
     border-left: 5px solid var(--panel-back);
+    border-top: 5px solid var(--panel-back);
     overflow-y: scroll;
     padding-top: 10px;
 }
