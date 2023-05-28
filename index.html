@@ -13,10 +13,14 @@
         }
 
     </script>
+    <script type="text/javascript" src="./lib/vexflow.js"></script>
     <script type="text/javascript" src="./lib/ml5.min.js"></script>
     <script type="text/javascript" src="./lib/Tone.js"></script>
+
+    <script type="text/javascript" type="module" src="velato_constants.js"></script>
+    <script type="text/javascript" type="module" src="velato_note.js"></script>
     <script type="text/javascript" type="module" src="velato_programbuilder.js"></script>
-    <script type="text/javascript" type="module" src="velato_interface.js"></script>
+    <script type="text/javascript" type="module" src="velato_audio_interface.js"></script>
     <script type="text/javascript" type="module" src="page_controls.js"></script>
 </head>
 <body>
@@ -32,7 +36,7 @@
             <div id="currentlySounding">
                 Current Note:
                 <span id="currNote"></span><br/>
-                Current Root Note:
+                Current Root:
                 <span id="rootNote"></span>
             </div>
             <div id="controls">
@@ -40,14 +44,17 @@
                 <div id="restart" class="button">RESET</div>
                 <div id="remove" class="button">UNDO</div>
             </div>
-            <div id="error"></div>
-            <div style="flex-direction: row; display:flex;">
-                <div class="notes_header">Velato Program</div>
-                <div class="notes_header">Current Command</div>
-            </div>
-            <div style="flex-direction: row; display:flex;flex: 100%;">
-                <div id="notes"></div>
-                <div id="curr_cmd_notes"><span class="exp">Whistle one note to set the root. Then whistle your first command!<br/><br/>Look at the Lexicon to the right for options.</span></div>
+            <div style="flex-direction: column; display:flex; height:100%;">
+                <div class="notes_header">Current Token</div>
+                <div id="curr_cmd_notes">
+                </div>
+                <div id="notes_row1" style="height:20%">
+                    <div id="feedback"><span class="exp">Whistle a first note to set the root. Then whistle your first command!<br/>Look at the Lexicon to the right for options.</span></div>
+                </div>
+                <div id="notes_row2" style="height:60%">
+                    <div class="notes_header">Velato Program</div>
+                    <div id="velato_program"></div>
+                </div>
             </div>
         </div>
         <div class="text-program box">

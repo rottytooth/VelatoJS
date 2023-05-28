@@ -1,13 +1,14 @@
-velato.notelist = [];
+velato.frequencylist = [];
 
-var velato_interface = function () {
+var velato_audio_interface = function () {
 
     /*
-     * Velato Interface is responsible for:
+     * Velato Audio Interface is responsible for:
      *
-	 * audio stream from the user
-	 * processing each pitch, marking beginning and end
-     * determining a note's final pitch, to be sent to velato.programbuilder
+     * audio stream from the user
+     * starting, pausing, ending programs
+     * detecting a new pitch and passing to velato.programbuilder
+     * reporting back errors from programbuilder
      * 
      * it writes directly to some divs (e.g. currNote)
      * 
@@ -21,20 +22,6 @@ var velato_interface = function () {
         "const output = document.getElementById('output');\n" +
         "function print(content) { output.innerText += content; } \n\n";
 
-    const NOTE_TRANSLATIONS = {
-        0: "root",
-        1: "2nd",
-        2: "2nd",
-        3: "3rd",
-        4: "3rd",
-        5: "4th",
-        6: "5th",
-        7: "5th",
-        8: "6th",
-        9: "6th",
-        10: "7th",
-        11: "7th"
-    }
 
     var is_stopped = false; // whether we are currently in a stopped state
 
@@ -82,7 +69,7 @@ var velato_interface = function () {
         req.onload  = function() {
             var noteset = parse_notes(JSON.parse(req.responseText));
             velato.programbuilder.create_notelist(noteset);
-            velato.notelist = noteset;
+            velato.frequencylist = noteset;
 
             input = setInterval(function() {
                 process_pitch(pitch, noteset);
@@ -95,7 +82,7 @@ var velato_interface = function () {
     var pitch_detect = null;
 
     // possibly unnecessary modal...
-    function close_loading_model() {
+    function close_loading_modal() {
         loading_modal = document.getElementById("loading_modal");
         loading_modal.style.display = "none";
     }
@@ -106,16 +93,15 @@ var velato_interface = function () {
         "./crepe/",
         audioContext,
         stream,
-        modelLoaded
+        streamStarted
         );
 
-        // When the model is loaded
-        function modelLoaded() {
-        console.log("Model Loaded!");
+        function streamStarted() {
+            console.log("Listening to audio stream");
         }
 
         load_notes(pitch_detect)
-        close_loading_model();
+        close_loading_modal();
     }
 
     function stopevent() {
@@ -123,7 +109,7 @@ var velato_interface = function () {
     }
 
     function stop(ended) {
-        // ended = program has ended
+        // ended = program has ended (instead of just paused)
 
         stopbtn = document.getElementById("stop");
 
@@ -172,6 +158,7 @@ var velato_interface = function () {
         }
     }
 
+    // These are for the INTRO modal 
     function close_modal(e) {
        var modal = document.getElementById("modal");
        var modal_content = document.getElementById("modal");
@@ -225,11 +212,18 @@ var velato_interface = function () {
             var note = {};
             for(let i = 1; i < noteset.length; i++) {
                 if (frequency < noteset[i].low) {
-                    note.name = noteset[i-1].name;
-                    note.octave = noteset[i-1].octave;
-                    note.freq = noteset[i-1].freq;
-                    note.index = i-1;
-                    note.actual_frequency = frequency;
+                    note = new velato.note(
+                        noteset[i-1].name,
+                        noteset[i-1].octave,
+                        noteset[i-1].freq,
+                        i-1,
+                        frequency
+                    );
+                    // note.name = noteset[i-1].name;
+                    // note.octave = noteset[i-1].octave;
+                    // note.freq = noteset[i-1].freq;
+                    // note.index = i-1;
+                    // note.actual_frequency = frequency;
                     break;
                 }
             }
@@ -252,14 +246,12 @@ var velato_interface = function () {
         if (numNulls > SPACE_BETWEEN_NOTES && currNote) {
             // if we held the current note long enough, record it
             if (currNote.notes > MIN_LENGTH_OF_NOTE) {
-                program = document.getElementById("notes");
-                curr_cmd_notes = document.getElementById("curr_cmd_notes");
-                currnote_name = velato.programbuilder.get_note_name(currNote.name);
-                program.innerHTML = program.innerHTML + `${currnote_name} ${currNote.octave}<br/>`;
-                program.scrollTop = program.scrollHeight;
-                curr_cmd_notes.innerHTML += "<br>" + currnote_name;
 
-                var err = document.getElementById("error");
+                curr_cmd_notes = document.getElementById("curr_cmd_notes");
+                currnote_name = currNote.displayname;
+
+                var err = document.getElementById("feedback");
+
                 // register it in the program
                 try {
                     let is_complete = velato.programbuilder.add_tone(currNote);
@@ -268,7 +260,7 @@ var velato_interface = function () {
                         complete_program();
                     }
                 } catch (e) {
-                    err.innerText = e;
+                    err.innerHTML= `<span class="err">${e}</span>`;
                 }
             }
             numNulls = 0;
@@ -305,7 +297,7 @@ var velato_interface = function () {
         currNoteOut = document.getElementById("currNote");
 
         // Get correct name for the note
-        note_name = velato.programbuilder.get_note_name(currNote.name, velato.programbuilder.root_note);
+        note_name = currNote.name;
 
         currNoteOut.innerHTML = note_name;
 
@@ -314,7 +306,7 @@ var velato_interface = function () {
             while (root_idx > currNote.index)
                 root_idx -= 12;
             interval = (currNote.index - root_idx) % 12;
-            interval_name = NOTE_TRANSLATIONS[interval];
+            interval_name = velato.INTERVALS[interval];
             currNoteOut.innerHTML += ` (${interval_name})`
         }
     }

@@ -4,3 +4,4 @@ crepe
 .DS_Store
 fonts
 fonts/*
+.vscode

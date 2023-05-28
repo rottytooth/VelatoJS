@@ -1,6 +1,5 @@
-// user interface for the page, such as playing notes and writing the lexicon
-// some of what's here should probably be combined into velato_interface
-// all stand-alone functions outside of velato namespace, belonging to the page
+// User interface for the page, such as playing notes and
+// updating the lexicon once a root note is set
 
 var synth;
 
@@ -92,34 +91,41 @@ function reset_root() {
 
 function poll_for_update_root() {
     if (velato.programbuilder.root_note != undefined) {
-        curr_note = velato.programbuilder.root_note.name;
+        root_note = velato.programbuilder.root_note;
 
         // is this the first note of the program or a new key?
-        if (key != curr_note || rootNotSet) {
-            console.log("set root note to " + velato.programbuilder.get_note_name(curr_note));
-            key = curr_note;
+        if (key != root_note.name || rootNotSet) {
+            console.log("set root note to " + root_note.displayname);
+            key = root_note;
             rootNotSet = false;
+
+            root_display = document.getElementById("rootNote");
+            root_display.innerText = root_note.displayname;    
 
             // update notes in instruction box
 
             // all notes in the list
             notes_to_list = document.getElementsByClassName('instructions')[0].querySelectorAll('.note');
             for (let i = 0; i < notes_to_list.length; i++) {
-                rootnote_idx = velato.notelist.findIndex(v => v.name == key && v.octave == 4);
+                rootnote_idx = velato.frequencylist.findIndex(v => v.name == key.name && v.octave == 4);
+
+                // FIXME: This is getting the name of the new note by looking at the frequency list
+                // Probably should just have a function in note that that does this without involving
+                // frequency list at all
 
                 // get the interval name
                 note = notes_to_list[i].querySelector(".int").innerText.trim();
-                interval_set = rootnote_idx + velato.programbuilder.note_translations[note.substring(1,note.length-1)];
+                interval_set = rootnote_idx + velato.INTERVALS_BY_NAME[note.substring(1,note.length-1)];
 
-                note_set = velato.programbuilder.note_translations[note.substring(1,note.length-1)];
+                note_set = velato.INTERVALS_BY_NAME[note.substring(1,note.length-1)];
                 
                 note_name = "";
                 for (let j = 0; j < note_set.length;j++) {
                     note_name += " ";
                     if (j > 0) note_name += "or ";
-                    note_name += velato.programbuilder.get_note_name(velato.notelist[rootnote_idx + note_set[j]].name, curr_note);
+                    note_name += velato.note.get_note_name(velato.frequencylist[rootnote_idx + note_set[j]].name, root_note);
                 }
-                notes_to_list[i].querySelector(".pitch").innerText = velato.programbuilder.get_note_name(note_name);
+                notes_to_list[i].querySelector(".pitch").innerText = note_name;
             }
         }   
     }
@@ -134,12 +140,12 @@ function play_toneset(notes, rootnote_idx, major, now, time_offset) {
     let i = 0;
     // play rest of sequence
     for (i = 0; i < notes.length; i++) {
-        intervals = velato.programbuilder.note_translations[notes[i]];
+        intervals = velato.INTERVALS_BY_NAME[notes[i]];
         if (intervals.length > 1) 
             has_two = true;
-        interval_set = velato.programbuilder.note_translations[notes[i]];
+        interval_set = velato.INTERVALS_BY_NAME[notes[i]];
         interval = (major > 0 && interval_set.length > 1 ? interval_set[major] : interval_set[0]);
-        synth.triggerAttackRelease(velato.notelist[rootnote_idx + interval].freq, "8n", now+0.5*(i+time_offset));
+        synth.triggerAttackRelease(velato.frequencylist[rootnote_idx + interval].freq, "8n", now+0.5*(i+time_offset));
     }
     if (has_two) 
         return i;
@@ -154,7 +160,7 @@ function tone(note_seq) {
 
     octave = 3;
 
-    rootnote_idx = velato.notelist.findIndex(v => v.name == key && v.octave == octave);
+    rootnote_idx = velato.frequencylist.findIndex(v => v.name == key.name && v.octave == octave);
     notes = note_seq.split(" ");
 
     offset = play_toneset(notes, rootnote_idx, 0, now, 0);

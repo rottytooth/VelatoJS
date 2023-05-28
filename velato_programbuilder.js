@@ -1,6 +1,4 @@
 
-var velato = {};
-
 velato.programbuilder = {};
 
 // velato.programbuilder
@@ -12,37 +10,14 @@ velato.programbuilder = {};
     _cmd_stack = []; // cmd tokens that have opened (but not yet closed)
     _exp_stack = []; // exp tokens yet to be processed. Always for a single commmand at a time. These are processed bottom-up, not up-down like _cmd_stack
 
+    _full_program = []; // velato program, all the notes no longer in _lex_stack
+
     // pr.curr_line = ""; // the current line of code we're building (in JS)
     pr.root_note = null; // the current root note which we use to compare intervals
     pr.notelist = []; // a list of one octave of notes, used as reference to calculate intervals
 
-    const DEFAULT_ACCIDENTALS = ["A♭","B♭","C♯","E♭","F♯"];
-
-    const SPECIAL_KEYS = {
-        "C": {
-            "acc": ["F♯"],
-            "def": "♭"
-        },
-        "G": {
-            "acc": ["B♭","E♭"],
-            "def": "♯"
-        },
-        "D": {
-            "acc": ["B♭"],
-            "def": "♯"
-        }
-    };
-
-    pr.note_translations = {
-        "root" : [0],
-        "2nd" : [1,2],
-        "3rd" : [3,4],
-        "4th" : [5],
-        "5th" : [6,7],
-        "6th" : [8,9],
-        "7th" : [10,11]
-    }
-
+    // vexflow
+    const { Factory, StaveNote, Accidental, Annotation } = Vex.Flow;
 
     // load command notes
     var req_cmd_notes = new XMLHttpRequest();
@@ -57,10 +32,11 @@ velato.programbuilder = {};
         else
             window.addEventListener("load", function() {
                 draw_tones(pr.lexicon);
-            });
+            });          
+        
     };
     req_cmd_notes.send(null);
-    
+
 
     // Build the list of all twelve tones
     // NOTE: this is called from outside and must be called before add_note() is used
@@ -70,100 +46,21 @@ velato.programbuilder = {};
         }
     }
 
-    // Find the interval from note1 to note2 within an octave
-    pr.interval = function(note1, note2) {
-        diff = (note2.index - note1.index) % 12;
-        while (diff < 0) 
-            diff += 12;
-        diff = Math.abs(diff); // to remove -0
-        return diff;
-    }
-
-    pr.build_accidental = function(names, root) {
-
-        acc = (names.length === 2); // passed note has an accidental
-
-        if (acc) {
-            flatv = names.find(x => x.includes("♭"));
-            sharpv = names.find(x => x.includes("♯"));
-        } else 
-            var name = names[0];
-
-        // if both root and passed note have accidentals
-        if (acc) { 
-            // if the note is the root
-            if (root === flatv || root === sharpv) {
-                return root;
-            }
-            // if the root is a flat, we also sound the flat
-            if (root.includes("♭")) {
-                return flatv;
-            }
-            // check if it's a "special" key whose minor is in flats and major not so
-            if (root in SPECIAL_KEYS) {
-                if (flatv in SPECIAL_KEYS[root].acc)
-                    return flatv;
-                if (sharpv in SPECIAL_KEYS[root].acc)
-                    return sharpv;
-                if (SPECIAL_KEYS[root].def == "♭")
-                    return flatv;
-                return sharpv;
-            }
-            // otherwise, it's the sharp that wins
-            return sharpv;
-        }
-
-        // e.g. B is sounded in key of B♭
-        if (root.length == 2 && root.substring(0,1) == name) {
-            return root.substring(0,1) + "♮";
-        }
-
-        // at the stage, only the naturals should be left, with no special treatment
-        return name;
-    }
-
-    pr.get_note_name = function(name, root) {
-        let names = name.split("/");
-        names = names.map(e => e.trim());
-
-        if (root == undefined)
-        {
-            if (name.includes("/")) {
-                for(let i = 0; i < 2; i++) {
-                    const newNote = DEFAULT_ACCIDENTALS.find(x => x == names[i]);
-                    if (newNote) {
-                        return newNote;
-                    }
-                }
-            } 
-            return name;
-        }
-        if (typeof root !== "string" && !(root instanceof String))
-            root = root.name;
-        return pr.build_accidental(names, pr.get_note_name(root));
-    }
-
-    // convert a tone to a variable name (within an octave, so all C's are the same)
-    pr.note_to_varname = function(note) {
-        varname = note.name.replace("/", "").replace(" ","").replace("♯","s").replace("♭","b").replace(" ","_");
-        return `var_${varname}`;
-    }
-
-    _dress = function(desc, exp) {
-        var cmd = document.getElementById("curr_cmd_notes");
+    _feedback = function(desc, exp) {
+        var cmd = document.getElementById("feedback");
         style = 'desc';
         if (exp) style = 'exp';
         cmd.innerHTML += ` <span class='${style}'>${desc}</span>`;
     }
 
-    _clear_err = function() {
-        var errs = document.getElementById("error");
+    _clear_feedback = function() {
+        var errs = document.getElementById("feedback");
         errs.innerHTML = "";
     }
 
     _clear_cmd_box = function() {
-        var curr_cmd_notes = document.getElementById("curr_cmd_notes");
-        curr_cmd_notes.innerHTML = "";
+        // var curr_cmd_notes = document.getElementById("curr_cmd_notes");
+        // curr_cmd_notes.innerHTML = "";
     }
 
     pr.remove_last_line = function() {
@@ -213,14 +110,8 @@ velato.programbuilder = {};
 
     pr.reset_line = function() {
         _lex_stack = [];
-        var curr_cmd_notes = document.getElementById("curr_cmd_notes");
-        curr_cmd_notes.innerHTML = "";
-    }
-
-    pr.update_root = function(new_root) {
-        pr.root_note = new_root;
-        root_display = document.getElementById("rootNote");
-        root_display.innerText = pr.get_note_name(new_root.name);
+        // var curr_cmd_notes = document.getElementById("curr_cmd_notes");
+        // curr_cmd_notes.innerHTML = "";
     }
 
     // if there's an error in the command, we print it, and reset the command, so the
@@ -240,13 +131,14 @@ velato.programbuilder = {};
     // does not clear flags, only the current word
     _add_exp = function(exp) {
         pr.curr_line += exp + " ";
+        _full_program = _full_program.concat(_lex_stack);
         _lex_stack = [];
         pr.print();
     }
 
     // print instruction for next item we're expecting
     _notate_child = function(cmd, expnum) {
-        _dress(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
+        _feedback(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
     }
 
     // build toward a command
@@ -291,6 +183,8 @@ velato.programbuilder = {};
                     pr.print('', true); // create blank
                 
                 // reset lexemes
+                _full_program = _full_program.concat(_lex_stack);
+                pr.write_program();
                 _lex_stack = [];
             }
         }
@@ -318,6 +212,77 @@ velato.programbuilder = {};
         }
     }
 
+    pr.write_curr_cmd = function() {
+        pr.write_notes("curr_cmd_notes", _lex_stack);
+    }
+
+    pr.write_program = function() {
+        pr.write_notes("velato_program", _full_program);
+    }
+
+    pr.write_notes = function(element, stack) {
+
+        if (stack.length == 0) return;
+
+        // clear curr cmd notes
+        document.getElementById(element).innerHTML = "";
+        
+        const vf = new Factory({
+            renderer: { elementId: element, width: 500, height: 150 },
+        });
+
+        const score = vf.EasyScore();
+        const system = vf.System();
+
+        const octave_drop = 1; // how many octaves lower to draw the note
+
+        var notes = [];
+
+        stack.forEach(el => {
+
+            var annotation = new Annotation(el.displayname);
+            annotation.setFont("Ubuntu", "12pt", "Medium");
+            annotation.setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+
+            stemdir = StaveNote.STEM_UP;
+
+            if (el.vexname > 'C' && el.octave == 6 || el.octave - octave_drop > 65) {
+                stemdir = StaveNote.STEM_DOWN;
+            }
+
+            note = new StaveNote({ keys: [`${el.vexname}/${el.octave - octave_drop}`], duration: "4", stem_direction: stemdir})
+            .addModifier(annotation);
+
+            if (el.vexname.length > 1) {
+                if (el.vexname[1] == "b") {
+                    note.addModifier(new Accidental("b"));
+                }
+                else {
+                    note.addModifier(new Accidental("#"));
+                }
+            }
+            notes.push(note);
+        });
+        
+        score.set({ time: notes.length + "/4" });
+        
+        system
+            .addStave({
+            voices: [
+                score.voice(notes)
+            ]})
+            .addClef('treble');
+
+        vf.draw();
+    }
+
+    _complete_cmd = function() {
+        // command is done. Clear it and clean up
+        _clear_cmd_box(); // done with command
+        _cmd_stack.pop();
+        pr.write_program();
+    }
+
     // This is the main entry point -- given a note, it will update the current command
     // and, if the command is complete, add to the final program
     pr.add_tone = function(note) {
@@ -325,18 +290,20 @@ velato.programbuilder = {};
             _throw_error("The note list needs to be set before calling pr.add_tone", true);
         }
 
+        note.build_names();
+
         // check for root note first, as interval() will fail without it
         if (pr.root_note === null) { // we don't have a current root note
-            pr.update_root(note);
-            pr.print("<span class=\"cmt\">// set root note to " + pr.get_note_name(note.name) + "</span>", true);
+            pr.root_note = note; // set to current note
+            pr.print("<span class=\"cmt\">// set root note to " + note.displayname + "</span>", true);
             _clear_cmd_box(); // done with command
             return;
         }
 
-        note.interval_semitones = pr.interval(pr.root_note, note);
-        note.interval = Object.keys(pr.note_translations).find(key => pr.note_translations[key].includes(note.interval_semitones)) 
-        note.root = pr.root_note;
+        note.set_root(pr.root_note);
         _lex_stack.push(note);
+
+        pr.write_curr_cmd();
 
         console.log("registering " + pr.format_note(note));
         if (pr.root_note != null)
@@ -351,16 +318,15 @@ velato.programbuilder = {};
                 case "Exp": // add an expression to the stack or complete it
                     break;
                 case "Tone": // a single tone as identifier
-                    let varname = pr.note_to_varname(note);
+                    let varname = note.vraname;
                     pr.print(_exp_stack[0].print.replace("{Tone}",varname));
-                    _exp_stack.shift(); // remove first element of array
+                    _exp_stack.shift(); // remove the expression we have completed
                     break;
             }
 
             // if that's the last item in the exp stack, pop the command
             if (_exp_stack.length == 0) {
-                _clear_cmd_box(); // done with command
-                _cmd_stack.pop();
+                _complete_cmd();
             }
         } else {
             // otherwise, let's see where we are in building the next command
@@ -370,5 +336,3 @@ velato.programbuilder = {};
     }    
     
 })(velato.programbuilder)
-
-

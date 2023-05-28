@@ -16,27 +16,27 @@
 
 /* global color scheme */
 :root {
-    --main-txt-color: #b9b9ba; /*#0088FF;*/
-    --txt-emphasis: #52beff;
-    --bright-emphasis: #3AD900; /*#9EFFFF;*/
+    --main-txt-color: #3b3b3d; /*#0088FF;*/
+    --txt-emphasis: #4b75d2;
+    --bright-emphasis: #559d5c; /*#9EFFFF;*/
     --header: #6f6f6f;
-    --focus-emphasis: #dcdcaf;
-    --panel-back: #232327; /*#002240;*/
-    --panel-back-highlight: #49494d;
-    --default-bck: #18181a;
+    --focus-emphasis: #8c6716;
+    --panel-back: #f2f2f2; /*#002240;*/
+    --panel-back-highlight: #909090;
+    --default-bck: #fff;
     --line-border: #23536a;
     --error: #ff2121;
-    --silence: #52beff; /*#014480;*/
+    --silence: #318da5; /*#014480;*/
 
     /* syntax colors */
     --code-default: #FFFFFF;
-    --code-var: #9EFFFF;
+    --code-var: #4875e5;
     --code-def: #FFFFFF;
     --code-operator: #FFFFFF;
-    --code-number: #FF80E1;
-    --code-comment: #0088FF;
-    --code-keyword: #dcdcaf;
-    --code-string: #3AD900;
+    --code-number: #8c6716;
+    --code-comment: #a4a6a7;
+    --code-keyword: #9c3190;
+    --code-string: #559d5c;
     --code-meta: #FF9D00;
 }
 
@@ -73,22 +73,28 @@ body, html {
     padding-right: 10px;
     margin: 0;
     background-color: var(--default-bck);
+    vertical-align: middle;
+    /* border-bottom: 1px solid var(--line-border); */
 }
 #header h1 {
     padding-top: 4px;
-    display: inline;
     margin-right: 16px;
     padding-left: 4px;
     padding-right: 4px;
     color: var(--header);
     vertical-align: middle;
+    display: inline-block;
+    margin-bottom: auto;
+    margin-top:auto;
 }
 #header h2 {
     padding-top: 15px;
     font-size: 120%;
-    display: inline;
     color: var(--main-txt-color);
     vertical-align: middle;
+    display: inline-block;
+    margin-bottom: 7px;
+    margin-top:auto;
 }
 #whistling {
     color: var(--txt-emphasis);
@@ -116,7 +122,7 @@ body, html {
 /* Column 2 */
 
 .note-program {
-    flex: 25%;
+    flex: 30%;
     border-right: 1px solid var(--line-border);
     display: flex;
     flex-direction: column;
@@ -126,7 +132,7 @@ body, html {
     font-size: 20px;
     line-height: 200%;
     margin: 0;
-    padding-bottom: 30px; 
+    padding-bottom: 15px; 
     padding-left: 10px;
     padding-top: 10px;
     background-color: var(--panel-back);
@@ -157,50 +163,52 @@ body, html {
 .button:hover {
     background-color: var(--panel-back-highlight);
 }
-
-#error {
-    flex: 60px;
+#notes_row1 {
+    background-color: var(--panel-back);
+}
+#feedback {
+    flex: 80px;
     padding-top: 10px;
+    background-color: var(--panel-back);
+    padding: 5px;
+    /* color: var(--error); */
+}
+#feedback .desc {
+    font-family: Ubuntu-Light;
+    color: var(--bright-emphasis);
+}
+#feedback .exp {
+    font-family: Ubuntu-Light;
+    color: var(--code-keyword);
+    font-size: 20px;
+    line-height: 26px;
+}
+#feedback .err {
     color: var(--error);
 }
-.notes_header {
-    display: flex;
-    flex: 50%;
-    flex-direction: column
-}
 #notes {
+    width: 100%;
     padding-top: 5px;
-    display: flex;
-    flex: 50%;
     overflow-y: auto;
-    flex-direction: column;
-    line-height: 20pt;
+    font-size: 20pt;
     padding: 5px;
     line-height: 26px;
 }
 #curr_cmd_notes {
-    display: flex;
-    flex: 50%;
+    width: 100%;
+    height: 140px;
     overflow-y: auto;
-    flex-direction: column;
-    background-color: var(--panel-back);
     font-size: 20px;
     padding: 5px;
     line-height: 26px;
-}
-#curr_cmd_notes .desc {
-    font-family: Ubuntu-Light;
-    color: var(--bright-emphasis);
-}
-#curr_cmd_notes .exp {
-    font-family: Ubuntu-Light;
-    color: var(--code-keyword);
+    margin-top: -30px;
+    opacity: 0.8;
 }
 
 /* Column 3 */
 
 .text-program {
-    flex: 25%;
+    flex: 15%;
     display: flex;
     flex-direction: column;
 }
@@ -318,13 +326,12 @@ body, html {
 	height: 100%;
 	overflow: auto;
     display: none;
-	background-color: rgba(0, 0, 0, .1);
+	background-color: rgba(154, 153, 153, 0.1);
 }
 
 #modal_content {
 	width: 50%;
-    border: 2px solid #000;
-    box-shadow: 0px 0px 10px black;
+    border: 2px solid #ccc;
     background-color: var(--panel-back);
     color: var(--main-txt-color);
 	margin: auto;
@@ -332,7 +339,7 @@ body, html {
 	border-radius: 10px;
 	overflow: hidden;
 	text-align: center;
-	box-shadow: 1px 1px 14px 3px rgba(0,0,0,0.25);	
+	box-shadow: 1px 1px 14px 3px rgba(154, 153, 153,0.25);	
     pointer-events: all;
     z-index: 9900;
 }
