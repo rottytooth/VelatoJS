@@ -141,13 +141,11 @@ var velato_audio_interface = function () {
         }
         velato.programbuilder.reset_program();
         
-        document.getElementById("notes").innerHTML = "";
+        document.getElementById("velato_program").innerHTML = "";
         document.getElementById("curr_cmd_notes").innerHTML = "";
         document.getElementById("error").innerHTML = "";
         document.getElementById("output").innerHTML = "";
         document.getElementById("program_txt").innerHTML = "";
-
-        velato.programbuilder.program_text = "";
 
         reset_root();
 
@@ -218,11 +216,6 @@ var velato_audio_interface = function () {
                         i-1,
                         frequency
                     );
-                    // note.name = noteset[i-1].name;
-                    // note.octave = noteset[i-1].octave;
-                    // note.freq = noteset[i-1].freq;
-                    // note.index = i-1;
-                    // note.actual_frequency = frequency;
                     break;
                 }
             }
@@ -251,8 +244,7 @@ var velato_audio_interface = function () {
 
                 var err = document.getElementById("feedback");
 
-                // FIXME: disabling try/catch for debug
-                // register it in the program
+                // // register it in the program
                 // try {
                     let is_complete = velato.programbuilder.add_tone(currNote);
                     err.innerText = "";

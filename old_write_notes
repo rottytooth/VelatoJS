@@ -1,0 +1,62 @@
+    pr.write_notes = function(element, stack) {
+
+        if (stack.length == 0) return; 
+
+        // clear curr cmd notes
+        document.getElementById(element).innerHTML = "";
+        
+        const vf = new Factory({
+            renderer: { elementId: element, width: 500, height: 150 },
+        });
+
+        const score = vf.EasyScore();
+        const system = vf.System();
+
+        const octave_drop = 1; // how many octaves lower to draw the note
+
+        var notes = [];
+
+        // loop through each token's notes
+        for (let i = 0; i < stack.length; i++) {
+
+            if (stack[i].notes.length == 0) continue;
+
+            stack[i].notes.forEach(el => {
+
+            var annotation = new Annotation(el.displayname);
+            annotation.setFont("Ubuntu", "12pt", "Medium");
+            annotation.setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+
+            stemdir = StaveNote.STEM_UP;
+
+            if (el.vexname > 'C' && el.octave == 6 || el.octave - octave_drop > 65) {
+                stemdir = StaveNote.STEM_DOWN;
+            }
+
+            note = new StaveNote({ keys: [`${el.vexname}/${el.octave - octave_drop}`], duration: "4", stem_direction: stemdir})
+            .addModifier(annotation);
+
+            if (el.vexname.length > 1) {
+                if (el.vexname[1] == "b") {
+                    note.addModifier(new Accidental("b"));
+                }
+                else {
+                    note.addModifier(new Accidental("#"));
+                }
+            }
+            notes.push(note);
+        })};
+
+        if (notes.length == 0) return;
+        
+        score.set({ time: notes.length + "/4" });
+        
+        system
+            .addStave({
+            voices: [
+                score.voice(notes)
+            ]})
+            .addClef('treble');
+
+        vf.draw();
+    }

@@ -10,7 +10,7 @@ velato.token = function() {
 
     this.js = ''; // program text corresponding to this token
 
-    this.newline = false; // text should end with a newline
+    // this.newline = false; // text should end with a newline
 
     this.add_note = function(note) {
         this.notes.push(note);
@@ -18,6 +18,14 @@ velato.token = function() {
 
     // called to produce js text from notes
     this.evaluate = function() {
+    }
+
+    this.clone = function() {
+        clone = new velato.token();
+        clone.notes = this.notes.slice(0); // copy array
+        clone.js = this.js;
+        // clone.newline = this.newline;
+        return clone;
     }
 }
 

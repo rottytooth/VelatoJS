@@ -22,9 +22,10 @@ velato.programbuilder = {};
     // update display of program each time a new token is pushed to the program
     eventify(_full_program, function(updatedArr) {
         pr.write_notes("velato_program", updatedArr);
+        pr.write_js_program(updatedArr);
 
         // clear curr command
-        document.getElementById("curr_cmd_notes").innerHTML = "";
+        // document.getElementById("curr_cmd_notes").innerHTML = "";
     });
 
     // update display of curr token each time a new note is pushed to that token
@@ -36,7 +37,7 @@ velato.programbuilder = {};
 
 
     // vexflow
-    const { Factory, StaveNote, Accidental, Annotation } = Vex.Flow;
+    // const { Factory, StaveNote, Accidental, Annotation } = Vex.Flow;
 
     // load command notes
     var req_cmd_notes = new XMLHttpRequest();
@@ -68,24 +69,6 @@ velato.programbuilder = {};
         errs.innerHTML = "";
     }
 
-    pr.print = function(text, newline=false) {
-
-        if (newline) {
-            if (pr.program_text.length > 0)
-                pr.program_text += "\n";
-            for (let i = 0; i < _cmd_stack.length-1; i++) {
-                pr.program_text += "\t";
-            }
-        }
-
-        pr.program_text += text;
-
-        // update on screen
-        let program = document.getElementById("program_txt");
-        program.innerHTML = pr.program_text;
-
-    }
-
     pr.reset_program = function() {
         _stackdepth = 0;
         root_display = document.getElementById("rootNote");
@@ -97,21 +80,16 @@ velato.programbuilder = {};
         pr.program_text = pr.beginning_program;
     }
 
-    // format a string for the note
-    pr.format_note = function(note) {
-        return `${note.name} ${note.octave}`;
-    }
 
-    pr.reset_line = function() {
-        _curr_token = velato.token();
-        // var curr_cmd_notes = document.getElementById("curr_cmd_notes");
-        // curr_cmd_notes.innerHTML = "";
+    pr.reset_token = function() {
+        _curr_token = new velato.token();
+        document.getElementById("curr_cmd_notes").innerHTML = "";
     }
 
     // if there's an error in the command, we print it, and reset the command, so the
     // programmer can try again
     _throw_error = function(msg, syntax) {
-        // pr.reset_line();
+        pr.reset_token();
         if (msg == null || msg == "") {
             msg = "Could not determine command"; // default syntax error
         }
@@ -121,15 +99,6 @@ velato.programbuilder = {};
             throw(`INTERNAL ERROR : ${msg}`);
     }
 
-    // add an expression to the current line and clear expression tones
-    // does not clear flags, only the current word
-    _add_exp = function(exp) {
-        pr.curr_line += exp + " ";
-        _full_program = _full_program.concat(_lex_stack);
-        _lex_stack = [];
-        pr.print();
-    }
-
     // print instruction for next item we're expecting
     _notate_child = function(cmd, expnum) {
         _feedback(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
@@ -137,50 +106,49 @@ velato.programbuilder = {};
 
     // build toward a command
     pr.check_cmd_token = function() {
-        g = pr.lexicon["Cmd"];
+        lex = pr.lexicon["Cmd"];
 
-        for(let i = 0; i < _curr_token.length; i++) {
-            if (g[_curr_token[i].interval] === undefined) {
-                pr.reset_line();
+        for(let i = 0; i < _curr_token.notes.length; i++) {
+
+            let matchedpath = lex[_curr_token.notes[i].interval]
+            if (matchedpath === undefined) {
+                // we have hit a sequence not in the lexicon
                 _throw_error("Invalid note sequence, resetting line", true);
             }
-            g = structuredClone(g[_curr_token[i].interval]);
-            if ("type" in g && g["type"] == "token") {
-
-                if (g["name"] == "SetRoot") {
-                    // special handling for SetRoot and Undo
-                    pr.root_note = null;
-                } else if (g["name"] == "EndBlock") {
-                    // add } to program
-                    _cmd_stack.pop(); // pop the last command
-                    _clear_cmd_box(); // done with command
-                } else if (g["children"] || g["childCmds"]) {
-                    //  if it requires child commands, keep it in the command stack
-                    _cmd_stack.push(g);
-
-                    // and if it has child expressions, put them in the expression stack
-                    if (_exp_stack.length > 0) {
-                        _throw_error("trying to add expressions when expression list already occupied");
-                    }
-                    _exp_stack.push.apply(_exp_stack, g["children"]);
-                    _notate_child(g, 0);
-                } else {
-                    // otherwise, process it right away
-
-                    _clear_cmd_box(); // done with command
-                }
-
-                // print if it has something to print
-                if (g["print"])
-                    pr.print(g["print"], true);
-                else
-                    pr.print('', true); // create blank
-                
-                // reset lexemes
-                _full_program = _full_program.concat(_lex_stack);
-                pr.write_program();
-                _lex_stack = [];
+            if (!("type" in matchedpath) || matchedpath["type"] != "token") {
+                // we are in a proper sequence but not at a token (end node)
+                continue;
             }
+
+            matchedpath = structuredClone(matchedpath);
+
+            if (lex["name"] == "SetRoot") {
+                // special handling for SetRoot and Undo
+                pr.root_note = null;
+
+            } else if (lex["name"] == "EndBlock") {
+                // add } to program
+                _cmd_stack.pop(); // pop the last command
+
+            } else if (lex["children"] || lex["childCmds"]) {
+                //  if it requires child commands, keep it in the command stack
+                _cmd_stack.push(lex);
+
+                // and if it has child expressions, put them in the expression stack
+                if (_exp_stack.length > 0) {
+                    _throw_error("trying to add expressions when expression list already occupied");
+                }
+                _exp_stack.push.apply(_exp_stack, lex["children"]);
+                _notate_child(lex, 0);
+            } else {
+                // otherwise, process it right away
+                _full_program.push(_curr_token);
+            }
+            
+            // reset lexemes
+            // _full_program.push(_curr_token.clone());
+            // pr.write_program();
+            _curr_token = new velato.token();
         }
     }
 
@@ -206,74 +174,79 @@ velato.programbuilder = {};
         }
     }
 
-    pr.write_notes = function(element, stack) {
+    pr.write_js_program = function(stack) {
+        let output = document.getElementById("program_txt");
 
+        let js_program = "<span class='str'>\"use strict\"</span>;\n";
+        for(let i = 0; i < stack.length; i++) {
+            js_program += stack[i].js;
+        }
+
+        output.innerHTML = js_program;
+    }
+
+    /*
+     * Writes notes to the screen as a png
+     * 
+     * PARAMS
+     * element = where the png will be added
+     * stack = an array of velato.token objects
+     */
+    pr.write_notes = function(element, stack) {
         if (stack.length == 0) return; 
 
         // clear curr cmd notes
         document.getElementById(element).innerHTML = "";
         
-        const vf = new Factory({
-            renderer: { elementId: element, width: 500, height: 150 },
-        });
+        notestxt = "";
 
-        const score = vf.EasyScore();
-        const system = vf.System();
-
-        const octave_drop = 1; // how many octaves lower to draw the note
-
-        var notes = [];
-
-        // loop through each token's notes
         for (let i = 0; i < stack.length; i++) {
 
             if (stack[i].notes.length == 0) continue;
 
+            notes = [];
+            notenames = [];
             stack[i].notes.forEach(el => {
+                notes.push(el.vexname);
+                notenames.push(el.displayname);
 
-            var annotation = new Annotation(el.displayname);
-            annotation.setFont("Ubuntu", "12pt", "Medium");
-            annotation.setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+            notestxt += `${notes.join(" ")} $${notenames.join(" ")}$`;
 
-            stemdir = StaveNote.STEM_UP;
 
-            if (el.vexname > 'C' && el.octave == 6 || el.octave - octave_drop > 65) {
-                stemdir = StaveNote.STEM_DOWN;
+            if (i <= stack.length) {
+                notestxt += " |";        
             }
 
-            note = new StaveNote({ keys: [`${el.vexname}/${el.octave - octave_drop}`], duration: "4", stem_direction: stemdir})
-            .addModifier(annotation);
-
-            if (el.vexname.length > 1) {
-                if (el.vexname[1] == "b") {
-                    note.addModifier(new Accidental("b"));
-                }
-                else {
-                    note.addModifier(new Accidental("#"));
-                }
-            }
-            notes.push(note);
         })};
 
-        if (notes.length == 0) return;
-        
-        score.set({ time: notes.length + "/4" });
-        
-        system
-            .addStave({
-            voices: [
-                score.voice(notes)
-            ]})
-            .addClef('treble');
+        // Cn/4 D/5 | E@/4 F/5 G/5
 
-        vf.draw();
+        const data = `
+        tabstave notation=true tablature=false
+        notes ${notestxt}
+        text ++,.1,:h,Declare var_d
+        `
+// text .11,
+        const VF = vextab.Vex.Flow;
+
+        const renderer = new VF.Renderer(document.getElementById(element),
+            VF.Renderer.Backends.SVG);
+            
+
+        // Initialize VexTab artist and parser.
+        const artist = new vextab.Artist(10, 10, 750, { scale: 0.8 });
+        const tab = new vextab.VexTab(artist);
+
+        tab.parse(data);
+        artist.render(renderer);
     }
+
 
     _complete_cmd = function() {
         // command is done. Clear it and clean up
         _clear_cmd_box(); // done with command
         _cmd_stack.pop();
-        pr.write_program();
+        // pr.write_program();
     }
 
     // This is the main entry point -- given a note, it will update the current command
@@ -286,19 +259,20 @@ velato.programbuilder = {};
         if (pr.root_note === null) { // we don't have a current root note
             pr.root_note = note; // set to current note
 
+            newroot = pr.lexicon["Cmd"]["2nd"]["children"][0]; // new root note
             token = new velato.token();
-            token.js = `<span class=\"cmt\">// set root note to ${note.displayname}</span>`;
-            token.newline = true;
+            token.js = newroot.print.replace("{Tone}", note.displayname);
             token.add_note(note);
 
             _full_program.push(token);
             return;
         }
 
+        // if we get here, there is a current root. set it in the note
         note.set_root(pr.root_note);
         _curr_token.notes.push(note);
 
-        console.log(`registering ${pr.format_note(note)}, root note: ${pr.format_note(pr.root_note)}`);
+        console.log(`registering ${note.with_octave()}, root note: ${pr.root_note.with_octave()}`);
 
         // if the open command has children (that are not other commands), address those first
         if (_cmd_stack.length > 0 && _exp_stack.length > 0) {
@@ -321,7 +295,7 @@ velato.programbuilder = {};
             }
         } else {
             // otherwise, let's see where we are in building the next command
-            // pr.check_cmd_token();
+            pr.check_cmd_token();
         }
 
     }    

@@ -10,6 +10,7 @@ window.velato = window.velato || {}
 velato.note = function(name, octave, freq, index, actual_frequency) {
 
     // letter name of the note (with alternates when needed)
+    // for notes with accidentals this includes BOTH equivalents (e.g. C# and Db)
     this.name = name;
 
     // which octave was sounded to create this note
@@ -31,11 +32,12 @@ velato.note = function(name, octave, freq, index, actual_frequency) {
      * Fill out names in the note used in program-building
      */
     this.build_names = function() {
-        // as displayed to user
+        // as displayed to user -- notes with acidentals are interpreted as one or other
         this.displayname = velato.note.get_note_name(this.name, this.root);
 
         // as used by vexflow
-        this.vexname = this.displayname.replace("♯","#").replace("♭","b");
+        // drop by one octave for display
+        this.vexname = `${this.displayname.replace("♯","#").replace("♭","@")}/${octave-1}`;
 
         // as used in a variable name in the js program
         varname = this.name.replace("/", "").replace(" ","").replace("♯","s").replace("♭","b").replace(" ","_");
@@ -56,6 +58,11 @@ velato.note = function(name, octave, freq, index, actual_frequency) {
     this.set_root = function(new_root) {
         this.root = new_root;
         this.build_names(); // rebuild names in terms of the new root
+    }
+
+    this.with_octave = function() {
+        // format a string for the note
+        return `${this.displayname} ${this.octave}`;
     }
 }
 

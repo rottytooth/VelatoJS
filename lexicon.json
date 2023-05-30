@@ -6,7 +6,8 @@
         "desc": "Set Root Note",
         "children": [
             {"type": "Tone",
-            "desc": "tone that will become the new root"}
+            "desc": "tone that will become the new root",
+            "print": "<span class='cmt'>// set root note to {Tone}</span>\n"}
         ],
         "childCmds": false
     },
