@@ -244,16 +244,16 @@ var velato_audio_interface = function () {
 
                 var err = document.getElementById("feedback");
 
-                // // register it in the program
-                // try {
+                // register it in the program
+                try {
                     let is_complete = velato.programbuilder.add_tone(currNote);
                     err.innerText = "";
                     if (is_complete === true) {
                         complete_program();
                     }
-                // } catch (e) {
-                //     err.innerHTML= `<span class="err">${e}</span>`;
-                // }
+                } catch (e) {
+                    err.innerHTML= `<span class="err">${e}</span>`;
+                }
             }
             numNulls = 0;
             currNote = null;

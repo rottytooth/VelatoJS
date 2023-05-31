@@ -43,8 +43,8 @@ velato.note = function(name, octave, freq, index, actual_frequency) {
         varname = this.name.replace("/", "").replace(" ","").replace("♯","s").replace("♭","b").replace(" ","_");
         this.varname = `var_${varname}`;
 
-        if (this.root !== undefined) {
-            diff = (this.root.index - this.index) % 12;
+        if (this.root != undefined) {
+            diff = (this.index - this.root.index) % 12;
             while (diff < 0) 
                 diff += 12;
             diff = Math.abs(diff); // to remove -0

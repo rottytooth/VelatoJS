@@ -7,6 +7,7 @@
         "children": [
             {"type": "Tone",
             "desc": "tone that will become the new root",
+            "notedesc": "New Root Tone",
             "print": "<span class='cmt'>// set root note to {Tone}</span>\n"}
         ],
         "childCmds": false

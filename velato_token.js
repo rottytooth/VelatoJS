@@ -8,7 +8,9 @@ velato.token = function() {
 
     this.notes = []; // set of velato.notes for the token
 
-    this.js = ''; // program text corresponding to this token
+    this.lexnode = undefined; // the node from lexicon.json that correspond to the interpreted token
+
+    // this.js = ''; // program text corresponding to this token
 
     // this.newline = false; // text should end with a newline
 
@@ -18,6 +20,9 @@ velato.token = function() {
 
     // called to produce js text from notes
     this.evaluate = function() {
+        if (!this.lexnode) {
+            return false;
+        }
     }
 
     this.clone = function() {
