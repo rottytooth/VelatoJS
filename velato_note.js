@@ -19,28 +19,45 @@ velato.note = function(name, octave, freq, index, actual_frequency) {
     // the frequency for this note when it is sounded perfectly
     this.freq = freq;
 
-    // its index in the frequencies.json list
-    this.index = index;
-
     // the actual frequency sounded to register this note
     this.actual_frequency = actual_frequency;
 
-    // once this is set, we will re-evaluate the names of the note
+    // its index in the frequencies.json list
+    this.index = index;
+
+
+    // Properties BELOW will all be determined when the root is set but start undefined:
+
+    // root at the time the note is sounded
     this.root = undefined; 
+
+    // interval in friendly name
+    this.interval = undefined; 
+
+    //  interval in number of semitones
+    this.interval_semitones = undefined; 
+
+    // as displayed to user -- notes with acidentals are interpreted as one or other
+    this.displayname = undefined; 
+
+    // as used by vexflow
+    this.vexname = undefined;
+    
+    // as used in a variable name in the js program
+    this.varname = undefined; 
  
+    
     /* 
      * Fill out names in the note used in program-building
      */
     this.build_names = function() {
-        // as displayed to user -- notes with acidentals are interpreted as one or other
+        
         this.displayname = velato.note.get_note_name(this.name, this.root);
 
-        // as used by vexflow
         // drop by one octave for display
         this.vexname = `${this.displayname.replace("♯","#").replace("♭","@")}/${octave-1}`;
 
-        // as used in a variable name in the js program
-        varname = this.name.replace("/", "").replace(" ","").replace("♯","s").replace("♭","b").replace(" ","_");
+        let varname = this.name.replace("/", "").replace(" ","").replace("♯","s").replace("♭","b").replace(" ","_");
         this.varname = `var_${varname}`;
 
         if (this.root != undefined) {

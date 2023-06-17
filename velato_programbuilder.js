@@ -6,9 +6,8 @@ velato.programbuilder = {};
     pr.beginning_program = '<span class="str">"use strict"</span>;';
     pr.program_text = pr.beginning_program; // the entire text of the js program we're building
 
-    _curr_token = new velato.token(); // lexemes (intervals) building toward a token. Always for a single command or expression at a time
-    _cmd_stack = []; // cmd tokens that have opened (but not yet closed) -- every program starts with a "set new root tone" command
-    _exp_stack = []; // exp tokens yet to be processed. Always for a single commmand at a time. These are processed bottom-up, not up-down like _cmd_stack
+    _curr_token = new velato.token(); // lexemes (note intervals) building toward a token. Always for a single command or expression at a time
+    _cmd_stack = []; // cmd tokens that have opened (but not yet closed) -- every program starts with a "set new root tone" command. Processed lifo
 
     _full_program = []; // velato program, all the notes no longer in _lex_stack
 
@@ -19,12 +18,12 @@ velato.programbuilder = {};
         };
     };
 
-    // update display of curr token each time a new note is pushed to that token
+    // update display of curr token each time a new note is pushed to that list
     eventify_push(_curr_token.notes, function(updatedArr) {
         pr.write_notes("curr_cmd_notes", [_curr_token]);
     });
 
-    // update display of program each time a new token is pushed to the program
+    // update display of program each time a new token is pushed to the program list
     eventify_push(_full_program, function(updatedArr) {
         pr.write_notes("velato_program", updatedArr);
         pr.write_js_program(updatedArr);
@@ -60,10 +59,7 @@ velato.programbuilder = {};
     _preset_to_change_key = function() {
         // program begins as if "change key" has been called
         // pre-load the two stacks with that scenario
-        _cmd_stack = [pr.lexicon["Cmd"]["2nd"]];
-        _exp_stack = [pr.lexicon["Cmd"]["2nd"]["children"][0]];
-        _curr_token = new velato.token();
-        _curr_token.lexnode = pr.lexicon["Cmd"]["2nd"]["children"][0];        
+        _cmd_stack = [JSON.parse(JSON.stringify(pr.lexicon["Cmd"]["2nd"]))];
     }
 
 
@@ -73,43 +69,82 @@ velato.programbuilder = {};
 
         note.build_names();
         note.set_root(pr.root_note); // if there is no root_note, this will be undefined
-        _curr_token.notes.push(note);
 
+        if (_curr_token == undefined) {
+            _curr_token = new velato.token();
+        }
+
+        _curr_token.add_note(note);
+
+        // report tone to screen
         root_str = "";
         if (pr.root_note != undefined) {
             root_str = `, root note: ${pr.root_note.with_octave()}`;
         }
         console.log(`registering ${note.with_octave()}${root_str}`);
 
-        // if the open command has children (that are not other commands), address those first
-        if (_exp_stack.length > 0) {
-            // we are processing this thing
-            switch(_exp_stack[0].type) {
-                case "NonFifthTone*": // a series of non-fifths until a fifth is sounded
-                    break;
-                case "Exp": // add an expression to the stack or complete it
-                    break;
-                case "Tone": // a single tone as identifier
-                    _exp_stack.shift(); // remove the expression we have completed
-
-                    // if there is no root, and we're in "Tone", we must be setting the root
-                    if (pr.root_note == undefined)
-                        pr.root_note = note;
-
-                    _full_program.push(_curr_token);
-                    break;
-            }
-
-            // if that's the last item in the exp stack, pop the command
-            if (_exp_stack.length == 0) {
-                _cmd_stack.pop();
-            }
-        } else {
-            // otherwise, let's see where we are in building the next command
+        // 1. Check if there is a Command in the stack _cmd_stack
+        if (_cmd_stack.length == 0) {
+            // 2. If no, see if we now have enough tones to process as a command
             pr.check_cmd_token();
+
+            // exit after processing command
+            return;
         }
 
-    }    
+        // 3. If yes, does it (still) have children (from lexicon.json) in their child queue? 
+
+        if (_cmd_stack.at(-1).children == undefined || _cmd_stack.at(-1).children.length == 0) {
+            _throw_error("Looking for child nodes of cmd but none available", false); 
+        }
+
+        let retset = _get_first_child(_cmd_stack.at(-1), _cmd_stack.at(-1));
+        let curr_child = retset[1];
+        let curr_parent = retset[0];
+
+        if (!_curr_token.print)
+            _curr_token.print = curr_child.print;
+
+        switch(curr_child.type) {
+            case "NonFifthTone*": // a series of non-fifths until a fifth is sounded
+                if (note.interval == "5th") {
+                    // we are done and can process this expression
+                    _full_program.push(_curr_token.clone());
+                    curr_parent.children.shift(); // this should remove curr_child
+                } else {
+                    let value = note.interval_semitones;
+                    if (value > 8)
+                        value -= 2; // subtract 2 semitones if above a fifth
+                    if (curr_child.seq_type == "char")
+                        value = String.fromCharCode(value);
+                    _curr_token.sequence.push(value);
+                }
+                break;
+            case "Exp": // add an expression to the stack or complete it
+                pr.check_exp_token();
+                break;
+            case "Tone": // a single tone as identifier
+                _curr_token.sequence.push(note.varname);
+                // remove the expression we have completed
+                _full_program.push(_curr_token.clone());
+                curr_parent.children.shift(); // this should remove curr_child
+                break;
+        }
+
+        // if we've processed everything in the exp stack, pop the command
+        if (_cmd_stack.at(-1).length == 0) {
+            _cmd_stack.pop();
+        }    
+    }
+
+    _get_first_child = function(parent, cmd) {
+
+        if (cmd.children != undefined && cmd.children.length > 0) {
+            return _get_first_child(cmd, cmd.children[0]);
+        }
+        return [parent, cmd];
+    }
+
 
     // build toward a command
     pr.check_cmd_token = function() {
@@ -131,7 +166,7 @@ velato.programbuilder = {};
             if (matchedpath["name"] == "SetRoot") {
                 // special handling for SetRoot and Undo
                 pr.root_note = null;
-                _exp_stack = matchedpath["children"].slice(0);
+                _exp_queue = matchedpath["children"].slice(0);
                 _curr_token.lexnode = matchedpath;
                 _full_program.push(_curr_token);
                 pr.reset_token();
@@ -150,7 +185,7 @@ velato.programbuilder = {};
                 pr.reset_token();
            } else {
                 // otherwise, process it right away
-                _exp_stack = matchedpath["children"].slice(0);
+                _exp_queue = matchedpath["children"].slice(0);
                 _curr_token.lexnode = matchedpath;
                 _full_program.push(_curr_token);
                 pr.reset_token();
@@ -158,40 +193,32 @@ velato.programbuilder = {};
         }
     }
 
-    // // build toward an expression
-    // pr.check_exp_token = function() {
-    //     g = pr.lexicon["Exp"];
+    // build toward a command
+    pr.check_exp_token = function() {
 
-    //     for(let i = 0; i < _lex_stack.length; i++) {
-    //         g = g[_lex_stack[i].interval];
-    //         if ("type" in g && g["type"] == "token") {
+        for(let i = 0; i < _curr_token.notes.length; i++) {
 
-    //             if (g["name"] == "CloseParens") {
-    //                 // we are ending the expression block
-    //                 // _cmd_stack[cmd_stack.length-1]
-    //             } else {
-    //                 // otherwise, process it right away
-    //                 pr.print(g["print"]);
-    //             }
-                
-    //             // reset lexemes
-    //             _lex_stack = [];
-    //         }
-    //     }
-    // }
+            let matchedpath = pr.lexicon["Exp"][_curr_token.notes[i].interval]
+            if (matchedpath == undefined) {
+                // we have hit a sequence not in the lexicon
+                _throw_error("Invalid note sequence, resetting line", true);
+            }
+            if (!("type" in matchedpath) || matchedpath["type"] != "token") {
+                // we are in a proper sequence but not at a token (end node)
+                continue;
+            }
+
+            matchedpath = structuredClone(matchedpath);
+        }
+    }    
 
     pr.write_js_program = function(stack) {
         let output = document.getElementById("program_txt");
 
         let js_program = "<span class='str'>\"use strict\"</span>;\n";
         for(let i = 0; i < stack.length; i++) {
-            if (stack[i].lexnode != undefined && Object.hasOwn(stack[i].lexnode, 'print')) {
-                let base_print = stack[i].lexnode.print;
-                base_print = base_print.replace("{Tone}",stack[i].notes[0].displayname);
-                js_program += base_print;
-            }
+            js_program += stack[i].evaluate();
         }
-
         output.innerHTML = js_program;
     }
 

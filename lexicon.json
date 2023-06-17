@@ -8,7 +8,7 @@
             {"type": "Tone",
             "desc": "tone that will become the new root",
             "notedesc": "New Root Tone",
-            "print": "<span class='cmt'>// set root note to {Tone}</span>\n"}
+            "print": "<span class='cmt'>// set root note to {varname}</span>\n"}
         ],
         "childCmds": false
     },
@@ -18,7 +18,7 @@
         "children": [
             {"type": "Tone",
             "desc": "tone corresponding to a variable",
-            "print": "<span class='var'>{Tone}</span> = "},
+            "print": "<span class='var'>{varname}</span> = "},
             {"type": "Exp",
             "desc": "expression",
             "print": "{Exp};"}
@@ -32,7 +32,7 @@
         "children": [
             {"type": "Tone",
             "desc": "tone corresponding to a variable",
-            "print": " <span class='var'>{Tone}</span>;"}
+            "print": " <span class='var'>{varname}</span>;"}
         ],
         "childCmds": false
     },
@@ -43,7 +43,8 @@
             "root": {
                 "type": "token",
                 "name": "EndProgram",
-                "desc": "End Program"
+                "desc": "End Program",
+                "print": "// end program"
             },
             "childCmds": false
         },
@@ -90,16 +91,19 @@
             "type": "token",
             "name": "Input",
             "children": [
-                {"type": "Exp",
-                "desc": "Expression"}
+                {"type": "Tone",
+                "desc": "Variable to store input",
+                "print": "let {varname} = get_input();"}
             ]
         },
         "5th": {
             "type": "token",
             "name": "Print",
+            "print": "print(",
             "children": [
                 {"type": "Exp",
-                "desc": "Expression"}
+                "desc": "Expression",
+                "print": "{Exp};"}
             ]
         }
     },
@@ -116,12 +120,14 @@
             "type": "token",
             "name": "CloseParens",
             "desc": ")",
+            "print": ")",
             "note": "This ends all expressions"
         },
         "6th": {
             "type": "token",
             "name": "OpenParens",
-            "desc": "("
+            "desc": "(",
+            "print": "("
         }
     },
     "root": {
@@ -132,7 +138,8 @@
             "name": "Variable",
             "children": [
                 {"type": "Tone",
-                "desc": "tone corresponding to a variable"}
+                "desc": "tone corresponding to a variable",
+                "print": " {varname}"}
             ]
         },
         "3rd": {
@@ -141,7 +148,8 @@
             "desc": "Negative Int",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "single note for each digit, avoiding 5th"}
+                "desc": "single note for each digit, avoiding 5th",
+                "print": " -{seq_int}"}
             ]
         },
         "4th": {
@@ -150,7 +158,8 @@
             "desc": "Char (Unicode)",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "Single note for each digit, avoiding 5th"}
+                "desc": "Single note for each digit, avoiding 5th",
+                "print": " {seq_char}"}
             ]
         },
         "5th": {
@@ -159,7 +168,8 @@
             "desc": "Positive Int",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "single note for each digit, avoiding 5th"}
+                "desc": "single note for each digit, avoiding 5th",
+                "print": " {seq_int}"}
             ]
         },
         "6th": {
@@ -168,9 +178,11 @@
             "desc": "Positive Float",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "single note for each digit, avoiding 5th"},
+                "desc": "single note for each digit, avoiding 5th",
+                "print": " {seq_int}"},
                 {"type": "NonFifthTone*",
-                "desc": "single note for each digit, avoiding 5th"}
+                "desc": "single note for each digit, avoiding 5th",
+                "print": ".{seq_int} "}
             ]
         },
         "7th": {
@@ -179,9 +191,11 @@
             "desc": "Negative Float",
             "children": [
                 {"type": "NonFifthTone*",
-                "desc": "single note for each digit, avoiding 5th"},
+                "desc": "single note for each digit, avoiding 5th",
+                "print": " {seq_int}"},
                 {"type": "NonFifthTone*",
-                "desc": "single note for each digit, avoiding 5th"}
+                "desc": "single note for each digit, avoiding 5th",
+                "print": ".{seq_int} "}
             ]
         }
     },
@@ -191,32 +205,38 @@
         "2nd": {
             "type": "token",
             "name": "Equality",
-            "desc": "Equality (==)"
+            "desc": "Equality (==)",
+            "print": "=="
         },
         "3rd": {
             "type": "token",
             "name": "GreaterThan",
-            "desc": "Greater Than (&gt;)"
+            "desc": "Greater Than (&gt;)",
+            "print": "&gt;"
         },
         "4th": {
             "type": "token",
             "name": "LessThan",
-            "desc": "Less Than (&lt;)"
+            "desc": "Less Than (&lt;)",
+            "print": "&lt;"
         },
         "5th": {
             "type": "token",
             "name": "Not",
-            "desc": "NOT"
+            "desc": "NOT",
+            "print": "!"
         },
         "6th": {
             "type": "token",
             "name": "And",
-            "desc": "AND"
+            "desc": "AND",
+            "print": "&&"
         },
         "7th": {
             "type": "token",
             "name": "Or",
-            "desc": "OR"
+            "desc": "OR",
+            "print": "||"
         }
     },
     "5th": {
@@ -230,22 +250,26 @@
         "3rd": {
             "type": "token",
             "name": "Add",
-            "desc": "+"
+            "desc": "+",
+            "print": "+"
         },
         "4th": {
             "type": "token",
             "name": "Divide",
-            "desc": "/"
+            "desc": "/",
+            "print": "/"
         },
         "5th": {
             "type": "token",
             "name": "Multiply",
-            "desc": "*"
+            "desc": "*",
+            "print": "*"
         },
         "6th": {
             "type": "token",
             "name": "Modulus",
-            "desc": "%"
+            "desc": "%",
+            "print": "%"
         }        
     }
 }
