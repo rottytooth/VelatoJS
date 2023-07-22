@@ -1,6 +1,13 @@
 // User interface for the page, such as playing notes and
 // updating the lexicon once a root note is set
 
+/*
+ * make sounds
+ * polls for updated root when root is reset
+ *  - sends this update to programbuilder
+ * resets root
+ */
+
 var synth;
 
 window.addEventListener("load", function() {

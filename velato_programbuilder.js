@@ -1,22 +1,28 @@
 
 velato.programbuilder = {};
+/*
+ * builds the js program
+ * interprets individual notes
+ * _print_output() writes to particular divs
+ */
 
-// velato.programbuilder
 (function(pr) {
     pr.beginning_program = '<span class="str">"use strict"</span>;';
     pr.program_text = pr.beginning_program; // the entire text of the js program we're building
 
-    _curr_token = new velato.token(); // lexemes (note intervals) building toward a token. Always for a single command or expression at a time
-    _cmd_stack = []; // cmd tokens that have opened (but not yet closed) -- every program starts with a "set new root tone" command. Processed lifo
+    _curr_token = new velato.token(); // lexemes (note intervals) building toward a token
+    
+    _cmd_stack = []; // cmd tokens that have opened but not yet closed. Processed lifo. A command is only cleared by a special "clearing command" such as a closing bracket
 
-    _full_program = []; // velato program, all the notes no longer in _lex_stack
+    _full_program = []; // velato program
 
+    //#region write events
     var eventify_push = function(arr, callback) {
         arr.push = function(e) {
             Array.prototype.push.call(arr, e);
             callback(arr);
         };
-    };
+    };  
 
     // update display of curr token each time a new note is pushed to that list
     eventify_push(_curr_token.notes, function(updatedArr) {
@@ -28,14 +34,14 @@ velato.programbuilder = {};
         pr.write_notes("velato_program", updatedArr);
         pr.write_js_program(updatedArr);
 
-        // clear curr command
+        // clear curr token
         pr.reset_token();
     });
-
+    //#endregion
 
     pr.root_note = null; // the current root note which we use to compare intervals
 
-    // load command notes
+    //#region load command notes
     var req_cmd_notes = new XMLHttpRequest();
     req_cmd_notes.overrideMimeType("application/json");
     req_cmd_notes.open('GET', "lexicon.json", true);
@@ -55,24 +61,38 @@ velato.programbuilder = {};
         
     };
     req_cmd_notes.send(null);
+    //#endregion
 
     _preset_to_change_key = function() {
         // program begins as if "change key" has been called
-        // pre-load the two stacks with that scenario
-        _cmd_stack = [JSON.parse(JSON.stringify(pr.lexicon["Cmd"]["2nd"]))];
+        // pre-load the stack with that scenario
+        let curr_token = new velato.token();
+        curr_token.lexpath = JSON.parse(JSON.stringify(pr.lexicon["Cmd"]["2nd"]));
+        _cmd_stack.push(curr_token);
     }
 
+    _curr_token_is_for_cmd = function() {
+        // are we currently building a command or expression?
 
-    // This is the main entry point -- given a note, it will update the current command
-    // and, if the command is complete, add to the final program
+        // there are no commands in the stack, so we must be making a command
+        if (_cmd_stack.length == 0) return true;
+
+        // all the children of the current command are settled, so it's a new one
+        if (_cmd_stack.at(-1).children == undefined || _cmd_stack.at(-1).children.length == 0) return true;
+
+        // if there are any children remaining, we are evaluating either those children or their children or their children's children, not a command
+        return false;
+    }
+
+    // This is the main entry point -- given a note, it will update the _curr_token
+    // and evaluate
     pr.add_tone = function(note) {
 
-        note.build_names();
         note.set_root(pr.root_note); // if there is no root_note, this will be undefined
 
-        if (_curr_token == undefined) {
-            _curr_token = new velato.token();
-        }
+        // if (_curr_token == undefined) {
+        //     _curr_token = new velato.token();
+        // }
 
         _curr_token.add_note(note);
 
@@ -82,14 +102,26 @@ velato.programbuilder = {};
             root_str = `, root note: ${pr.root_note.with_octave()}`;
         }
         console.log(`registering ${note.with_octave()}${root_str}`);
+        
+        // are we creating a command token or an expression token or a non-token child (like a Tone)?
+        if (_curr_token_is_for_cmd()) {            
+
+            // See if we now have enough tones to process as a command
+            pr.check_cmd_token();
+
+            // // exit after processing command
+            // return;
+
+        } else {
+            // we are building something else. What is it we are building?
+            const [curr_parent, curr_child] = _get_first_child(_cmd_stack.at(-1), _cmd_stack.at(-1)); // the current child and its parent (a cmd or expression)
+
+            print(curr_child["type"]);
+        }
 
         // 1. Check if there is a Command in the stack _cmd_stack
         if (_cmd_stack.length == 0) {
-            // 2. If no, see if we now have enough tones to process as a command
-            pr.check_cmd_token();
-
-            // exit after processing command
-            return;
+            
         }
 
         // 3. If yes, does it (still) have children (from lexicon.json) in their child queue? 
@@ -98,19 +130,17 @@ velato.programbuilder = {};
             _throw_error("Looking for child nodes of cmd but none available", false); 
         }
 
-        let retset = _get_first_child(_cmd_stack.at(-1), _cmd_stack.at(-1));
-        let curr_child = retset[1];
-        let curr_parent = retset[0];
+        // const [curr_cmd, curr_child] = _get_first_child(_cmd_stack.at(-1), _cmd_stack.at(-1)); // the current command and its first (remaining) child (cmd or expression)
 
-        if (!_curr_token.print)
-            _curr_token.print = curr_child.print;
+        if (!_curr_token._print)
+            _curr_token._print = curr_child._print;
 
         switch(curr_child.type) {
             case "NonFifthTone*": // a series of non-fifths until a fifth is sounded
                 if (note.interval == "5th") {
                     // we are done and can process this expression
-                    _full_program.push(_curr_token.clone());
-                    curr_parent.children.shift(); // this should remove curr_child
+                    _full_program.push(_curr_token);
+                    curr_cmd.children.shift(); // this should remove curr_child
                 } else {
                     let value = note.interval_semitones;
                     if (value > 8)
@@ -126,13 +156,19 @@ velato.programbuilder = {};
             case "Tone": // a single tone as identifier
                 _curr_token.sequence.push(note.varname);
                 // remove the expression we have completed
-                _full_program.push(_curr_token.clone());
-                curr_parent.children.shift(); // this should remove curr_child
+
+                // if this is setting the root note, we need to actually set it now
+                if (curr_cmd.name == "SetRoot")
+                    pr.root_note = note;
+
+                _full_program.push(_curr_token); // this resets _curr_token
+
+                curr_cmd.children.shift(); // this should remove curr_child
                 break;
         }
 
         // if we've processed everything in the exp stack, pop the command
-        if (_cmd_stack.at(-1).length == 0) {
+        if (_cmd_stack.at(-1).children.length == 0) {
             _cmd_stack.pop();
         }    
     }
@@ -149,14 +185,17 @@ velato.programbuilder = {};
     // build toward a command
     pr.check_cmd_token = function() {
 
+        let matchedpath = pr.lexicon["Cmd"];
+
         for(let i = 0; i < _curr_token.notes.length; i++) {
 
-            let matchedpath = pr.lexicon["Cmd"][_curr_token.notes[i].interval]
+            matchedpath = matchedpath[_curr_token.notes[i].interval];
+
             if (matchedpath == undefined) {
                 // we have hit a sequence not in the lexicon
                 _throw_error("Invalid note sequence, resetting line", true);
             }
-            if (!("type" in matchedpath) || matchedpath["type"] != "token") {
+            if (!("type" in matchedpath) || matchedpath["type"] != "Token") {
                 // we are in a proper sequence but not at a token (end node)
                 continue;
             }
@@ -165,30 +204,27 @@ velato.programbuilder = {};
 
             if (matchedpath["name"] == "SetRoot") {
                 // special handling for SetRoot and Undo
-                pr.root_note = null;
+                // pr.root_note = null;
                 _exp_queue = matchedpath["children"].slice(0);
-                _curr_token.lexnode = matchedpath;
-                _full_program.push(_curr_token);
-                pr.reset_token();
+                _curr_token.setlex(matchedpath);
+                // _full_program.push(_curr_token);
 
             } else if (matchedpath["name"] == "EndBlock") {
                 // add } to program
                 _cmd_stack.pop(); // pop the last command
-                _curr_token.lexnode = matchedpath;
-                _full_program.push(_curr_token);
-                pr.reset_token();
+                _curr_token.setlex(matchedpath);
+                // _full_program.push(_curr_token);
 
             } else if (matchedpath["childCmds"]) {
                 //  if it requires child commands, keep it in the command stack
                 _cmd_stack.push(matchedpath);
-                _full_program.push(_curr_token);
-                pr.reset_token();
-           } else {
+                // _full_program.push(_curr_token);
+
+            } else {
                 // otherwise, process it right away
                 _exp_queue = matchedpath["children"].slice(0);
-                _curr_token.lexnode = matchedpath;
-                _full_program.push(_curr_token);
-                pr.reset_token();
+                _curr_token.setlex(matchedpath);
+                // _full_program.push(_curr_token);
             }
         }
     }
@@ -282,7 +318,7 @@ velato.programbuilder = {};
             VF.Renderer.Backends.SVG);
             
 
-        // Initialize VexTab artist and parser.
+        // Initialize VexTab artist and parser
         const artist = new vextab.Artist(10, 10, 750, { scale: 0.8 });
         const tab = new vextab.VexTab(artist);
 

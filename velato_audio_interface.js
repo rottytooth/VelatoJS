@@ -10,7 +10,7 @@ var velato_audio_interface = function () {
      * detecting a new pitch and passing to velato.programbuilder
      * reporting back errors from programbuilder
      * 
-     * it writes directly to some divs (e.g. currNote)
+     * It writes directly to some divs (e.g. currNote)
      * 
      */
 
@@ -143,7 +143,7 @@ var velato_audio_interface = function () {
         
         document.getElementById("velato_program").innerHTML = "";
         document.getElementById("curr_cmd_notes").innerHTML = "";
-        document.getElementById("error").innerHTML = "";
+        document.getElementById("feedback").innerHTML = "";
         document.getElementById("output").innerHTML = "";
         document.getElementById("program_txt").innerHTML = "";
 

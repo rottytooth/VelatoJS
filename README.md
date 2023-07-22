@@ -1,3 +1,6 @@
-# VelatoJS
- A hands-free programming language where you generate JavaScript by whistling
- 
+<h1 align="center">Velato</h1>
+
+Hands-free programming. Write JavaScript by whistling.
+
+
+
