@@ -1,11 +1,13 @@
 {
 "Cmd": {
     "2nd": {
-        "type": "Token",
+        "node_type": "Token",
+        "token_type": "Cmd",
         "name": "SetRoot",
         "desc": "Set Root Note",
         "children": [
-            {"type": "Tone",
+            {"node_type": "ChildToken",
+            "token_type": "Tone",
             "desc": "tone that will become the new root",
             "notedesc": "New Root Tone",
             "print": "<span class='cmt'>// set root note to {varname}</span>\n"}
@@ -13,31 +15,36 @@
         "childCmds": false
     },
     "3rd": {
-        "type": "Token",
+        "node_type": "Token",
+        "token_type": "Cmd",
         "name": "Let",
         "children": [
-            {"type": "Tone",
+            {"node_type": "ChildToken",
+            "token_type": "Tone",
             "desc": "tone corresponding to a variable",
             "print": "<span class='var'>{varname}</span> = "},
-            {"type": "Exp",
+            {"node_type": "ChildToken",
+            "token_type": "Exp",
             "desc": "expression",
-            "print": "{Exp};"}
+            "postprint": ";"}
         ],
         "childCmds": false
     },
     "4th": {
-        "type": "Token",
+        "node_type": "Token",
+        "token_type": "Cmd",
         "name": "Declare",
         "print": "<span class='key'>var</span>",
         "children": [
-            {"type": "Tone",
+            {"node_type": "ChildToken",
+            "token_type": "Tone",
             "desc": "tone corresponding to a variable",
             "print": " <span class='var'>{varname}</span>;"}
         ],
         "childCmds": false
     },
     "root": {
-        "type": "Category",
+        "node_type": "Category",
         "desc": "Blocks (root)",
         "root": {
             "root": {
@@ -49,198 +56,231 @@
             "childCmds": false
         },
         "2nd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Cmd",
             "name": "While",
             "print": "<span class='key'>while</span> (",
             "children": [
-                {"type": "Exp",
+                {"node_type": "ChildToken",
+                "token_type": "Exp",
                 "desc": "Expression",
-                "print": "{Exp} {"}
+                "postprint": " {"}
             ],
             "childCmds": true
         },
         "3rd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Cmd",
             "name": "EndBlock",
             "desc": "End Block",
             "print": "}",
             "childCmds": false
         },
         "5th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Cmd",
             "name": "If",
             "print": "<span class='key'>if</span> (",
             "children": [
-                {"type": "Exp",
+                {"node_type": "ChildToken",
+                "token_type": "Exp",
                 "desc": "Expression",
-                "print": "{Exp} {"}
+                "postprint": " {"}
             ],
             "childCmds": true
         },
         "6th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Cmd",
             "name": "Else",
             "childCmds": true,
             "print": "} else {"
         }
     },
     "6th": {
-        "type": "Category",
+        "node_type": "Category",
         "desc": "I/O (6th)",
         "4th": {
             "type": "Token",
             "name": "Input",
             "children": [
-                {"type": "Tone",
+                {"node_type": "ChildToken",
+                "token_type": "Tone",    
                 "desc": "Variable to store input",
                 "print": "let {varname} = get_input();"}
             ]
         },
         "5th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Cmd",    
             "name": "Print",
             "print": "print(",
             "children": [
-                {"type": "Exp",
+                {"node_type": "ChildToken",
+                "token_type": "Exp",
                 "desc": "Expression",
-                "print": "{Exp};"}
+                "postprint": ";"}
             ]
         }
     },
     "7th": {
-        "type": "Token",
+        "node_type": "Token",
+        "token_type": "Cmd",
         "name": "Undo",
         "desc": "Undo Last Command"
     }
 },
 "Exp": {
     "6th": {
+        "node_type": "Category",
         "desc": "Procedural (6th)",
         "2nd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",    
             "name": "CloseParens",
             "desc": ")",
             "print": ")",
             "note": "This ends all expressions"
         },
         "6th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",    
             "name": "OpenParens",
             "desc": "(",
             "print": "("
         }
     },
     "root": {
-        "type": "Category",
+        "node_type": "Category",
         "desc": "Value (1st / root)",
         "2nd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Variable",
             "children": [
-                {"type": "Tone",
+                {"node_type": "ChildToken",
+                "token_type": "Tone",    
                 "desc": "tone corresponding to a variable",
                 "print": " {varname}"}
             ]
         },
         "3rd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "NegativeInt",
             "desc": "Negative Int",
             "children": [
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": " -{seq_int}"}
             ]
         },
         "4th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Char",
             "desc": "Char (Unicode)",
             "children": [
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "Single note for each digit, avoiding 5th",
                 "print": " {seq_char}"}
             ]
         },
         "5th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "PositiveInt",
             "desc": "Positive Int",
             "children": [
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": " {seq_int}"}
             ]
         },
         "6th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "PositiveFloat",
             "desc": "Positive Float",
             "children": [
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": " {seq_int}"},
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": ".{seq_int} "}
             ]
         },
         "7th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "NegativeFloat",
             "desc": "Negative Float",
             "children": [
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": " {seq_int}"},
-                {"type": "NonFifthTone*",
+                {"node_type": "ChildToken",
+                "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": ".{seq_int} "}
             ]
         }
     },
     "3rd": {
-        "type": "Category",
+        "node_type": "Category",
         "desc": "Conditional (3rd)",
         "2nd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Equality",
             "desc": "Equality (==)",
             "print": "=="
         },
         "3rd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "GreaterThan",
             "desc": "Greater Than (&gt;)",
             "print": "&gt;"
         },
         "4th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "LessThan",
             "desc": "Less Than (&lt;)",
             "print": "&lt;"
         },
         "5th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Not",
             "desc": "NOT",
             "print": "!"
         },
         "6th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "And",
             "desc": "AND",
             "print": "&&"
         },
         "7th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Or",
             "desc": "OR",
             "print": "||"
         }
     },
     "5th": {
-        "type": "Category",
+        "node_type": "Category",
         "desc": "Math (5th)",
         "2nd": {
             "type": "Token",
@@ -248,25 +288,29 @@
             "desc": "-"
         },
         "3rd": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Add",
             "desc": "+",
             "print": "+"
         },
         "4th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Divide",
             "desc": "/",
             "print": "/"
         },
         "5th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Multiply",
             "desc": "*",
             "print": "*"
         },
         "6th": {
-            "type": "Token",
+            "node_type": "Token",
+            "token_type": "Exp",
             "name": "Modulus",
             "desc": "%",
             "print": "%"

@@ -27,13 +27,13 @@ function crawl_list(cmds, cmdlistdiv, tone_pattern) {
             let lcl_tone_pattern = tone_pattern + " " + key;
 
             // if it is not a token
-            if (cmds[key].type == 'category') {
+            if (cmds[key].node_type == 'Category') {
                 // <span class="ul_head">Blocks (root)</span>
 
                 cmd_block_li.innerHTML = `<span class="ul_head">${cmds[key].desc}</span>`;
 
                 cmdlistdiv.appendChild(cmd_block_li);
-            } else if (cmds[key].type == 'token') {
+            } else if (cmds[key].node_type == 'Token') {
  
                 let play_btn = document.createElement('span');
 

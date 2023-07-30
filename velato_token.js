@@ -8,48 +8,116 @@ window.velato = window.velato || {}
  * * the entire program as a series of notes
  * * the entire program as js commands
  */
-velato.token = function() {
+velato.token = function(lex) {
 
-    this.notes = []; // set of velato.notes for the token
+    this._lexicon = lex;
+
+    this.notes = []; // set of velato.notes for the token -- the actual lexeme
 
     this.sequence = []; // used for numerics or chars
 
-    this._print = undefined;
+    this._print = ""; // print before children
+    this._postprint = ""; // print after children
 
-    this.lexnode = undefined; // the node in lexicon.json that this token is identified as
+    this.lexpath = undefined; // this will hold the path to the definition of the token
+
+    this.children = [];
+
+    this.resolved = false;
+
+    this.indent = 0;
+
+
+    this.setlexpath = function(lexpath) {
+        this.lexpath = lexpath; // the node in lexicon.json that this token is identified as
+
+        lexicon = this._lexicon;
+        let val = this.lexpath.reduce((o, n) => o[n], lexicon);
+        this.is_defined = true;
+
+        this.type = val.token_type;
+
+        this.name = val.name;
+        this.desc = val.desc;
+        this._print = val.print;
+        this._postprint = val.postprint;
+        this.notedesc = val.notedesc;
+        this.childCmds = val.childCmds;
+
+        if (this.type == "Cmd") {
+            this.resolved = true;
+        }
+
+        // child nodes are their own copy to track if they are complete
+        if (val.children !== undefined) {
+            for (let i = 0; i < val.children.length; i++) {
+                let new_child = new velato.token(this._lexicon);
+                child_lexpath = this.lexpath;
+                child_lexpath.push("children");
+                child_lexpath.push(i);
+                new_child.setlexpath(child_lexpath);
+                this.children.push(new_child);
+            }
+            // this.children = JSON.parse(JSON.stringify(val.children));
+        }
+    }
 
     this.add_note = function(note) {
         this.notes.push(note);
     }
 
-    this.setlex = function(node) {
-        this.lexnode = structuredClone(node);
-        this.type = node.type;
-        this.name = node.name;
-        this.desc = node.desc;
-        this._print = node.print;
-        this.childCmds = node.childCmds;
+    this.print = function(retstr) {
+        if (retstr === undefined) retstr = "";
 
-        this.children = structuredClone(node.children);
+        if (this.type == "Cmd")
+            for(let i = 0; i < this.indent;i++)
+                retstr += "\t";
+
+        if (this._print !== undefined) // this can happen if lexicon.json is lacking it
+            retstr += this._print.replace("{varname}", this.sequence[0])
+                .replace("{seq_int}", this.sequence.join())
+                .replace("{seq_char}", String.fromCharCode(this.sequence.join()));
+
+            // recursively go through children (but not child commands) and print
+        for(let i = 0; i < this.children.length;i++) {
+            retstr += this.children[i].print();
+        }
+
+        if (this._postprint !== undefined)
+            retstr += this._postprint;
+
+        return retstr;
     }
 
-    // called to produce js text from notes
-    this.evaluate = function() {
-        if (!this._print)
-            return "";
+    // // we reset the token so that events that are tied to the _curr_cmd remain
+    // // rather than just creating a new one and re-attaching the event
+    // // and possibly have tokens downstream that still have events attached
+    // this.reset = function() {
+    //     this.notes = [];
+    //     this.sequence = [];
+    //     this.is_defined = true;
 
-        return this._print
-            .replace("{varname}", this.sequence[0]) // this should already be set to a variable name in this case
-            .replace("{seq_int}", this.sequence.join())
-            .replace("{seq_char}", String.fromCharCode(this.sequence.join()));
-    }
+    //     this.type = undefined;
+    //     this.name = undefined;
+    //     this.desc = undefined;
+    //     this._print = undefined;
+    //     this.notedesc = undefined;
+    //     this.childCmds = undefined;
+    //     this.children = undefined;
+    // }
 
     // this.clone = function() {
-    //     clone = new velato.token();
-    //     clone.notes = this.notes.slice(0); // copy array
-    //     clone.sequence = this.sequence.slice(0);
-    //     clone._print = this._print;
-    //     return clone;
+        
+    //     let rettoken = velato.token(this.lexicon);
+
+    //     rettoken.notes = JSON.parse(JSON.stringify(this.notes));
+
+    //     rettoken.sequence = JSON.parse(JSON.stringify(this.sequence));
+
+    //     rettoken.setlexpath(this.lexpath);
+    //     rettoken.children = JSON.parse(JSON.stringify(this.children));
+
+    //     return rettoken;
     // }
 }
 
