@@ -57,23 +57,10 @@ velato.programbuilder = {};
 
     //#endregion
 
-    _start_new_cmd = function() {
-        if (_curr_cmd != undefined) {
-           _cmd_stack.push(_curr_cmd);
-        }
-        _curr_cmd = new velato.token(pr.lexicon);
-        _curr_cmd.indent = _cmd_stack.length;
-
-        // // update display of curr token each time a new note is pushed to that list
-        // eventify_push(_curr_cmd.notes, function(updatedArr) {
-        //     pr.write_notes("curr_cmd_notes", [_curr_cmd]);
-        // });
-    }
-
     _preset_to_change_key = function() {
         // program begins as if "change key" has been called
         // pre-load the stack with that scenario
-        _start_new_cmd();
+        pr.reset_token();
         _curr_cmd.setlexpath(["Cmd","2nd"]);
     }
 
@@ -81,6 +68,7 @@ velato.programbuilder = {};
         if (pr.lexicon === undefined)
             throw new Error("Attempting to create cmd obj without lexicon");
         _curr_cmd = new velato.token(pr.lexicon);
+        _curr_cmd.indent = _cmd_stack.length;
         document.getElementById("curr_cmd_notes").innerHTML = "";
     }
 
@@ -102,6 +90,7 @@ velato.programbuilder = {};
             // No, we need to add another note and re-test for completeness
             _curr_cmd.add_note(note);
             pr.check_cmd_token();
+            pr.write_notes("curr_cmd_notes", [_curr_cmd]); // display it
             return;
         }
 
@@ -140,7 +129,7 @@ velato.programbuilder = {};
                 _cmd_stack.push(_curr_cmd);
 
             // reset
-            _curr_cmd = new velato.token(pr.lexicon);
+            pr.reset_token();
         }
 
         pr.write_notes("curr_cmd_notes", [_curr_cmd]);
@@ -171,15 +160,6 @@ velato.programbuilder = {};
             case "Tone": // a single tone as identifier
                 token.sequence.push(note.varname);
                 token.resolved = true;
-                // remove the expression we have completed
-
-                // if this is setting the root note, we need to actually set it now
-                // if (curr_cmd.name == "SetRoot")
-                //     pr.root_note = note;
-
-                // _full_program.push(_curr_cmd); // this resets _curr_token
-
-                // curr_cmd.children.shift(); // this should remove curr_child
                 break;
         }
     }
@@ -208,51 +188,33 @@ velato.programbuilder = {};
     // build toward a command
     pr.check_cmd_token = function() {
 
-        let matchedpath = pr.lexicon["Cmd"];
+        let path = ["Cmd"]; // set for cmd only
 
-        for(let i = 0; i < _curr_cmd.notes.length; i++) {
+        for(let i = 0; i < _curr_cmd.notes.length; i++) // build path from intervals
+            path.push(_curr_cmd.notes[i].interval);
 
-            matchedpath = matchedpath[_curr_cmd.notes[i].interval];
+        matchedpath = path.reduce((o, n) => o[n], pr.lexicon)
 
-            if (matchedpath == undefined) {
-                // we have hit a sequence not in the lexicon
-                _throw_error("Invalid note sequence, resetting line", true);
-            }
-            if ("type" in matchedpath && matchedpath["type"] == "Category") {
-                //TODO: print what we're in to the screen
-            }
-            if (!("type" in matchedpath) || matchedpath["type"] != "Token") {
-                // we are in a proper sequence but not at a token (end node)
-                continue;
-            }
-
-            matchedpath = structuredClone(matchedpath);
-
-            if (matchedpath["name"] == "SetRoot") {
-                // special handling for SetRoot and Undo
-                // pr.root_note = null;
-                _exp_queue = matchedpath["children"].slice(0);
-                _curr_cmd.setlex(matchedpath);
-                // _full_program.push(_curr_cmd);
-
-            } else if (matchedpath["name"] == "EndBlock") {
-                // add } to program
-                _cmd_stack.pop(); // pop the last command
-                _curr_cmd.setlex(matchedpath);
-                // _full_program.push(_curr_cmd);
-
-            } else if (matchedpath["childCmds"]) {
-                //  if it requires child commands, keep it in the command stack
-                _cmd_stack.push(matchedpath);
-                // _full_program.push(_curr_cmd);
-
-            } else {
-                // otherwise, process it right away
-                _exp_queue = matchedpath["children"].slice(0);
-                _curr_cmd.setlex(matchedpath);
-                // _full_program.push(_curr_cmd);
-            }
+        if (matchedpath == undefined) {
+            // we have hit a sequence not in the lexicon
+            _throw_error("Invalid note sequence, resetting line", true);
         }
+        if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
+            //TODO: print what we're in to the screen
+            _feedback(`adding ${matchedpath["desc"]}`);
+        }
+        if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
+            // we are in a proper sequence but not at a token (end node)
+            return;
+        }
+
+        _curr_cmd.setlexpath(path);
+
+        if (matchedpath["name"] == "EndBlock") {
+            _cmd_stack.pop(); // pop the last command
+            //FIXME: do we do this here?
+
+        } 
     }
 
     // build toward a command
@@ -313,35 +275,31 @@ velato.programbuilder = {};
         desctxt = "";
         commandtxt = "";
 
-        let processed_notes = 0;
         for (let i = 0; i < stack.length; i++) {
 
             let notelist = _get_note_list(stack[i], []);
 
             if (notelist.length == 0) continue;
 
-            // may need to get this recursively
+            // may need to get this recursively - for expressions to show
             if (stack[i].notedesc != undefined)
                 commandtxt += stack[i].notedesc;
-            if (stack[i].desc != undefined)
-                commandtxt += stack[i].desc;
+            if (stack[i].desc != undefined) {
+                if (commandtxt.length > 0)
+                    commandtxt += "\ntext ";
+                commandtxt += stack[i].desc + ",|";
+            }
 
+            notelist.forEach(not => {
+                notestxt += `${not.vexname} $${not.displayname}$`;
+            });
+            // notestxt += `${notes.join(" ")} $${notenames.join(" ")}$`;
 
-            notes = [];
-            notenames = [];
-            notelist.forEach(el => {
-                notes.push(el.vexname);
-                notenames.push(el.displayname);
-
-            notestxt += `${notes.join(" ")} $${notenames.join(" ")}$`;
-
-
-            if (i <= stack.length) {
+            if (i <= stack.length - 1) {
                 notestxt += " |";        
             }
 
-            processed_notes++;
-        })};
+        };
 
         if (commandtxt.length > 0) {
             commandtxt = `text ++,.1,:q,${commandtxt}`;

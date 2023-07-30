@@ -21,18 +21,18 @@ velato.token = function(lex) {
 
     this.lexpath = undefined; // this will hold the path to the definition of the token
 
-    this.children = [];
+    this.children = []; // child nodes of any type except Cmds (Tone, Exp etc)
 
     this.resolved = false;
 
-    this.indent = 0;
+    this.indent = 0; // how many blocks it is in
 
 
     this.setlexpath = function(lexpath) {
         this.lexpath = lexpath; // the node in lexicon.json that this token is identified as
 
-        lexicon = this._lexicon;
-        let val = this.lexpath.reduce((o, n) => o[n], lexicon);
+        let l = this._lexicon;
+        let val = this.lexpath.reduce((o, n) => o[n], l);
         this.is_defined = true;
 
         this.type = val.token_type;
@@ -48,7 +48,7 @@ velato.token = function(lex) {
             this.resolved = true;
         }
 
-        // child nodes are their own copy to track if they are complete
+        // child nodes are their own copy, to track if they are complete
         if (val.children !== undefined) {
             for (let i = 0; i < val.children.length; i++) {
                 let new_child = new velato.token(this._lexicon);
@@ -58,7 +58,6 @@ velato.token = function(lex) {
                 new_child.setlexpath(child_lexpath);
                 this.children.push(new_child);
             }
-            // this.children = JSON.parse(JSON.stringify(val.children));
         }
     }
 
@@ -88,36 +87,5 @@ velato.token = function(lex) {
 
         return retstr;
     }
-
-    // // we reset the token so that events that are tied to the _curr_cmd remain
-    // // rather than just creating a new one and re-attaching the event
-    // // and possibly have tokens downstream that still have events attached
-    // this.reset = function() {
-    //     this.notes = [];
-    //     this.sequence = [];
-    //     this.is_defined = true;
-
-    //     this.type = undefined;
-    //     this.name = undefined;
-    //     this.desc = undefined;
-    //     this._print = undefined;
-    //     this.notedesc = undefined;
-    //     this.childCmds = undefined;
-    //     this.children = undefined;
-    // }
-
-    // this.clone = function() {
-        
-    //     let rettoken = velato.token(this.lexicon);
-
-    //     rettoken.notes = JSON.parse(JSON.stringify(this.notes));
-
-    //     rettoken.sequence = JSON.parse(JSON.stringify(this.sequence));
-
-    //     rettoken.setlexpath(this.lexpath);
-    //     rettoken.children = JSON.parse(JSON.stringify(this.children));
-
-    //     return rettoken;
-    // }
 }
 
