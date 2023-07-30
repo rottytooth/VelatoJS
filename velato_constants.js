@@ -1,5 +1,7 @@
 var velato = {};
 
+velato.NOTES_PER_LINE = 6;
+
 velato.INTERVALS = {
     0: "root",
     1: "2nd",

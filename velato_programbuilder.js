@@ -261,55 +261,61 @@ velato.programbuilder = {};
      * 
      * PARAMS
      * element = where the png will be added
-     * stack = an array of velato.token objects
+     * stack = an array of velato.token command objects
      */
-    pr.write_notes = function(element, stack) {
-        if (stack.length == 0) return; 
+    pr.write_notes = function(element, commands) {
+        if (commands.length == 0) return; 
 
-        if (stack.length == 1 && stack[0].print().length == 0) return;
+        if (commands.length == 1 && commands[0].print().length == 0) return;
 
         // clear curr cmd notes
         document.getElementById(element).innerHTML = "";
         
-        notestxt = "";
-        desctxt = "";
-        commandtxt = "";
+        let notestxt = "";
+        let commandtxt = "";
 
-        for (let i = 0; i < stack.length; i++) {
+        let notecount = 0; // how many notes we have printed onto this line so far
 
-            let notelist = _get_note_list(stack[i], []);
+        const newlinestart = "tabstave notation=true tablature=false\nnotes "
+        let vextabstave_content = newlinestart;
+
+        for (let i = 0; i < commands.length; i++) {
+
+            let notelist = _get_note_list(commands[i], []);
 
             if (notelist.length == 0) continue;
 
-            // may need to get this recursively - for expressions to show
-            if (stack[i].notedesc != undefined)
-                commandtxt += stack[i].notedesc;
-            if (stack[i].desc != undefined) {
+            notecount += notelist.length;
+
+            if (notecount > velato.NOTES_PER_LINE && i > 0){
+                // start a new line if we've printed at least one measure on this line and adding the current measure would put us over the notes per line
+                vextabstave_content += notestxt + "\n" + commandtxt + "\n\noptions space=40\n\n" + newlinestart;
+                notecount = 0;
+                notestxt = "";
+                commandtxt = "";
+            }
+
+            if (commands[i].desc != undefined) {
                 if (commandtxt.length > 0)
                     commandtxt += "\ntext ";
-                commandtxt += stack[i].desc + ",|";
+                else
+                    commandtxt = "text ++,.1,:q,"; 
+                commandtxt += commands[i].desc + ",|";
             }
 
             notelist.forEach(not => {
                 notestxt += `${not.vexname} $${not.displayname}$`;
             });
-            // notestxt += `${notes.join(" ")} $${notenames.join(" ")}$`;
 
-            if (i <= stack.length - 1) {
+            if (i <= commands.length - 1) {
                 notestxt += " |";        
             }
 
         };
+        
+        // add remaining notes and text for last line
+        vextabstave_content += notestxt + "\n" + commandtxt + "\n";
 
-        if (commandtxt.length > 0) {
-            commandtxt = `text ++,.1,:q,${commandtxt}`;
-        }
-
-        const data = `
-        tabstave notation=true tablature=false
-        notes ${notestxt}
-        ${commandtxt}
-        `
         const VF = vextab.Vex.Flow;
 
         const renderer = new VF.Renderer(document.getElementById(element),
@@ -320,7 +326,7 @@ velato.programbuilder = {};
         const artist = new vextab.Artist(10, 10, 750, { scale: 0.8 });
         const tab = new vextab.VexTab(artist);
 
-        tab.parse(data);
+        tab.parse(vextabstave_content);
         artist.render(renderer);
     }
 
