@@ -52,7 +52,7 @@ velato.token = function(lex) {
         if (val.children !== undefined) {
             for (let i = 0; i < val.children.length; i++) {
                 let new_child = new velato.token(this._lexicon);
-                child_lexpath = this.lexpath;
+                child_lexpath = this.lexpath.map((x) => x); // clone
                 child_lexpath.push("children");
                 child_lexpath.push(i);
                 new_child.setlexpath(child_lexpath);

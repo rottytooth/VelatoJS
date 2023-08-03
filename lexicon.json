@@ -18,6 +18,7 @@
         "node_type": "Token",
         "token_type": "Cmd",
         "name": "Let",
+        "desc": "Let",
         "children": [
             {"node_type": "ChildToken",
             "token_type": "Tone",
@@ -29,12 +30,13 @@
             "postprint": ";"}
         ],
         "childCmds": false
-    },
+    },      
     "4th": {
         "node_type": "Token",
         "token_type": "Cmd",
         "name": "Declare",
         "print": "<span class='key'>var</span>",
+        "desc": "Declare Var",
         "children": [
             {"node_type": "ChildToken",
             "token_type": "Tone",
