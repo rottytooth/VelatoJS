@@ -1,6 +1,6 @@
 var velato = {};
 
-velato.NOTES_PER_LINE = 6;
+velato.NOTES_PER_LINE = 8;
 
 velato.INTERVALS = {
     0: "root",

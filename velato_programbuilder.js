@@ -202,6 +202,7 @@ velato.programbuilder = {};
         if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
             //TODO: print what we're in to the screen
             _feedback(`adding ${matchedpath["desc"]}`);
+            return;
         }
         if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
             // we are in a proper sequence but not at a token (end node)
@@ -218,22 +219,32 @@ velato.programbuilder = {};
     }
 
     // build toward a command
-    pr.check_exp_token = function() {
+    pr.check_exp_token = function(note, token) {
 
-        for(let i = 0; i < _curr_cmd.notes.length; i++) {
+        let path = ["Exp"]; // set for exp only
 
-            let matchedpath = pr.lexicon["Exp"][_curr_cmd.notes[i].interval]
-            if (matchedpath == undefined) {
-                // we have hit a sequence not in the lexicon
-                _throw_error("Invalid note sequence, resetting line", true);
-            }
-            if (!("type" in matchedpath) || matchedpath["type"] != "token") {
-                // we are in a proper sequence but not at a token (end node)
-                continue;
-            }
+        for(let i = 0; i < _curr_cmd.notes.length; i++) // build path from intervals
+            path.push(token.notes[i].interval);
 
-            matchedpath = structuredClone(matchedpath);
+        matchedpath = path.reduce((o, n) => o[n], pr.lexicon)
+
+        if (matchedpath == undefined) {
+            // we have hit a sequence not in the lexicon
+            _throw_error("Invalid note sequence, resetting line", true);
         }
+        if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
+            //TODO: print what we're in to the screen
+            _feedback(`adding ${matchedpath["desc"]}`);
+            return;
+        }
+        if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
+            // we are in a proper sequence but not at a token (end node)
+            return;
+        }
+            
+        matchedpath = structuredClone(matchedpath);
+        _curr_cmd.notes = token.notes; // is this right?
+        _curr_cmd.children.push(matchedpath);
     }    
 
 
