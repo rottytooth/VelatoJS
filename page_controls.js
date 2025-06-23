@@ -19,6 +19,8 @@ noteset = "";
 
 rootNotSet = true;
 
+DEFAULT_FIRSTNOTE = 39;
+
 function crawl_list(cmds, cmdlistdiv, tone_pattern) {
 
     for (const key in cmds) {
@@ -152,6 +154,7 @@ function play_toneset(notes, rootnote_idx, major, now, time_offset) {
             has_two = true;
         interval_set = velato.INTERVALS_BY_NAME[notes[i]];
         interval = (major > 0 && interval_set.length > 1 ? interval_set[major] : interval_set[0]);
+        if (rootnote_idx == -1) rootnote_idx = DEFAULT_FIRSTNOTE;
         synth.triggerAttackRelease(velato.frequencylist[rootnote_idx + interval].freq, "8n", now+0.5*(i+time_offset));
     }
     if (has_two) 
@@ -175,4 +178,28 @@ function tone(note_seq) {
     if (offset > 0) {
         play_toneset(notes, rootnote_idx, 1, now, offset+1);
     }
+}
+
+function tone_whistlerange(notes) {
+    const now = Tone.now();
+    const notelist = notes.split(" ");
+
+    for (i = 0; i < notelist.length; i++) {
+        let octave = 6;
+        // if (notelist[i] == "E")
+        //     octave = 7;
+
+        if (velato.frequencylist)
+            synth.triggerAttackRelease(velato.frequencylist.find(t => 
+                t.octave === octave
+                && (
+                (t.name.indexOf("/") > -1 && t.name.split("/")[0].trim() === notelist[i])
+                || (t.name.indexOf("/") > -1 && t.name.split("/")[1].trim() === notelist[i])
+                || (t.name == notelist[i] && t.name.indexOf() == -1))
+            ).freq, "1.5n", now+i*2);
+    }
+}
+
+function fib_ex() {
+    tone_whistlerange('A C♯ C♯ A E A E F# B');
 }

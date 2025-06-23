@@ -7,7 +7,8 @@ velato.programbuilder = {};
  */
 
 (function(pr) {
-    pr.beginning_program = '<span class="str">"use strict"</span>;';
+    pr.beginning_program = '';
+
     pr.program_text = pr.beginning_program; // the entire text of the js program we're building
     
     _cmd_stack = []; // stack of cmd tokens that have opened but not yet closed. A command is popped when we meet its closing bracket
@@ -96,7 +97,7 @@ velato.programbuilder = {};
 
         // Yes, so we must be building its children (tones, expressions, etc)
         if (_curr_cmd.children.length == 0) {
-            _throw_error("Unresolved command has no child nodes", false); 
+            _throw_error("This note does not lead to a valid command", true); 
         }
 
         { // resolve child
@@ -251,7 +252,8 @@ velato.programbuilder = {};
     pr.write_js_program = function(stack) {
         let output = document.getElementById("program_txt");
 
-        let js_program = "<span class='str'>\"use strict\"</span>;\n";
+        let js_program = pr.beginning_program;
+        if (pr.beginning_program) js_program += "\n";
         for(let i = 0; i < stack.length; i++) {
             js_program += stack[i].print();
         }

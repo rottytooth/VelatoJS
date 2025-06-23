@@ -1,9 +1,6 @@
 #FIBONACCI in Velato
 
- declare var_c# // num1                 A D C#
- declare var_f# // num2                 D F#
- declare var_g# // i                    D G#
- declare var_d // sumOfPrevTwo          D D
+ // set key of A                        A
                                        
  let var_c# = 0                         C# C# | A E A E | F# B
  let var_f# = 1                         C# F# | A E Bb E | F# B

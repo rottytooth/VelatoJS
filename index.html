@@ -29,7 +29,7 @@
 <div id="outframe">
     <div id="header">
         <h1>Velato</h1>
-        <h2>Program by <a href="javascript:popup();" id="whistling">whistling</a>. A Hands-Free Code Editor by <a href="http://danieltemkin.com" id="danieltemkin">Daniel Temkin</a></h2>
+        <h2>Program by <a href="javascript:popup();" id="whistling">whistling</a>. A Hands-Free Code Editor by <a href="http://danieltemkin.com" id="danieltemkin">Daniel Temkin</a>. One of <a href="https://mitpress.mit.edu/9780262553087/forty-four-esolangs/">Forty-Four Esolangs</a>.</h2>
     </div><div class="main">
         <div class="input-stream box">Input Stream
             <div id="incidentals"></div>
@@ -61,13 +61,17 @@
         </div>
         <div class="text-program box">
             <div id="js-program">JS Program
-                <pre><code class="language-javascript" id="program_txt"><span class="str">"use strict"</span>;</code></pre>
+                <pre><code class="language-javascript" id="program_txt"></code></pre>
             </div>
             <div id="js-output">Program Output
                 <div id="output"></div>
             </div>
         </div>
-        <div class="instructions box">
+        <div class="col4 box">
+            <div style="padding-bottom: 20px;">
+                <span class="playbutton" onclick="fib_ex()"><b>&#x23F5; Play Fibonacci demo</b></span>
+            </div>
+            <div class="instructions">
             <h2>Lexicon</h2>
             <a href="javascript:popup();">How do I use this?</a>
             <p>Click the play button (&#x23F5;) to hear one or two options in how to sound the notes for this phrase</p>
@@ -84,8 +88,10 @@
 
             <div class="padding"></div>
         </div>
+        </div>
     </div>
 </div><div id="modal"><div id="modal_content"><span class="close" id='close'>&times;</span>HOW TO WHISTLE A PROGRAM<br/>
+    <p><b>NOTE: If you're using a headset, there's a good chance it is noise-cancelling and will cancel all your whistling!</b></p>
     <p>First, whistle a single note to set the initial key. Until you change key, all intervals will be in terms of that note.</p>
     <p>The input stream to the left shows any sound the interpreter thinks might be a whistle. A note needs to hold for more than half a second (three consecutive appearances in the stream) before it registers. It will not register until it breaks off (for at least 200 milliseconds). That means that, if you start a note off-key, you can let it drift to the correct pitch; just hold the final note for a moment.</p>
     <p>If you are not sure how to sound a command or expression, try the play buttons in the Lexicon. Most combinations have more than one possibility: major/minor or perfect/diminished. The play button will play both.</p>

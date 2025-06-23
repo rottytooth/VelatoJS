@@ -254,13 +254,15 @@ body, html {
 }
 
 /* Column 4 */
-
-.instructions {
+.col4 {
     flex: 0 0 250px;
+}
+.instructions {
     border-left: 5px solid var(--panel-back);
     border-top: 5px solid var(--panel-back);
     overflow-y: scroll;
     padding-top: 10px;
+    padding-left: 10px;
 }
 .instructions ul, li {
     padding-left: 0;
@@ -274,6 +276,8 @@ body, html {
 }
 .instructions h3, p {
     padding-top: 20px;
+}
+.instructions h3 {
     line-height: 200%;
 }
 .instructions h2 {
