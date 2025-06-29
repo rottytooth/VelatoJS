@@ -1,5 +1,4 @@
-
-window.velato = window.velato || {}
+ if (!velato) var velato = {};
 
 /*
  * A velato.token is the basic parsing unit of the language

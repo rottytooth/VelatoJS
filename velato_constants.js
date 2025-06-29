@@ -1,4 +1,4 @@
-var velato = {};
+if (!velato) var velato = {};
 
 velato.NOTES_PER_LINE = 8;
 

@@ -1,9 +1,13 @@
+if (!velato) var velato = {};
 
 velato.programbuilder = {};
 /*
  * builds the js program
  * interprets individual notes
  * _print_output() writes to particular divs
+ * 
+ * THIS WORKS DIRECTLY WITH THE BROWSER 
+ * FIXME: output and formatting should be moved to a separate file
  */
 
 (function(pr) {
@@ -108,7 +112,7 @@ velato.programbuilder = {};
                 pr.resolve_child(note, child);
         }
         // is child resolved?
-        let [parent, child] = _get_first_unresolved_child(_curr_cmd, _curr_cmd);
+        let [, child] = _get_first_unresolved_child(_curr_cmd, _curr_cmd);
 
         // no child returned, meaning command is DONE
         if (child === undefined) {

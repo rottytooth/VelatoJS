@@ -1,5 +1,5 @@
 
-window.velato = window.velato || {}
+if (!velato) var velato = {};
 
 /*
  * A velato.note represents the note in several contexts:
