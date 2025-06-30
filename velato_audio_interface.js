@@ -1,3 +1,5 @@
+// not included in node / jest
+
 velato.frequencylist = [];
 
 var velato_audio_interface = function () {
@@ -65,7 +67,7 @@ var velato_audio_interface = function () {
         // load list of notes
         var req = new XMLHttpRequest();
         req.overrideMimeType("application/json");
-        req.open('GET', "frequencies.json", true);
+        req.open('GET', "data/frequencies.json", true);
         req.onload  = function() {
             var noteset = parse_notes(JSON.parse(req.responseText));
             velato.frequencylist = noteset;
@@ -298,7 +300,7 @@ var velato_audio_interface = function () {
             while (root_idx > currNote.index)
                 root_idx -= 12;
             interval = (currNote.index - root_idx) % 12;
-            interval_name = velato.INTERVALS[interval];
+            interval_name = velato.c.INTERVALS[interval];
             currNoteOut.innerHTML += ` (${interval_name})`
         }
     }
