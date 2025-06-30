@@ -5,6 +5,14 @@ if (!velato) var velato = {};
 velato.web_display = (function() {
     // Responsible for all user feedback and display of the program
 
+    const _get_note_list = function(node, set) {
+        if (node.notes.length > 0)
+            set.push.apply(set, node.notes);
+        for(let i = 0; i < node.children.length; i++) {
+            _get_note_list(node.children[i], set)
+        }
+        return set;
+    }
     /**
      * Writes notes to the screen as a png
      * 

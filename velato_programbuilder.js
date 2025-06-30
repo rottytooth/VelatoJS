@@ -19,7 +19,7 @@ if (typeof module !== 'undefined' && module.exports) {
     velato.token = require('./velato_token');
 
     // for node, this will replace the web display with the tester
-    velato.web_display = require('./velato_tester_display');
+    velato.web_display = require('./tests/velato_tester_display');
 }
 
 (function(pr) { 
@@ -276,15 +276,6 @@ if (typeof module !== 'undefined' && module.exports) {
             js_program += stack[i].print();
         }
         velato.web_display.write_full_program(js_program);
-    }
-
-    const _get_note_list = function(node, set) {
-        if (node.notes.length > 0)
-            set.push.apply(set, node.notes);
-        for(let i = 0; i < node.children.length; i++) {
-            _get_note_list(node.children[i], set)
-        }
-        return set;
     }
 
     pr.reset_program = function() {
