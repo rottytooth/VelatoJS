@@ -124,9 +124,9 @@ function poll_for_update_root() {
 
                 // get the interval name
                 note = notes_to_list[i].querySelector(".int").innerText.trim();
-                interval_set = rootnote_idx + velato.INTERVALS_BY_NAME[note.substring(1,note.length-1)];
+                interval_set = rootnote_idx + velato.c.INTERVALS_BY_NAME[note.substring(1,note.length-1)];
 
-                note_set = velato.INTERVALS_BY_NAME[note.substring(1,note.length-1)];
+                note_set = velato.c.INTERVALS_BY_NAME[note.substring(1,note.length-1)];
                 
                 note_name = "";
                 for (let j = 0; j < note_set.length;j++) {
@@ -143,16 +143,18 @@ function poll_for_update_root() {
 a = setInterval(poll_for_update_root, 250);  
 // FIXME: this should be event-based, not polling
 
+var vextabstave_content = "";
+
 function play_toneset(notes, rootnote_idx, major, now, time_offset) {
     has_two = false;
 
     let i = 0;
     // play rest of sequence
     for (i = 0; i < notes.length; i++) {
-        intervals = velato.INTERVALS_BY_NAME[notes[i]];
+        intervals = velato.c.INTERVALS_BY_NAME[notes[i]];
         if (intervals.length > 1) 
             has_two = true;
-        interval_set = velato.INTERVALS_BY_NAME[notes[i]];
+        interval_set = velato.c.INTERVALS_BY_NAME[notes[i]];
         interval = (major > 0 && interval_set.length > 1 ? interval_set[major] : interval_set[0]);
         if (rootnote_idx == -1) rootnote_idx = DEFAULT_FIRSTNOTE;
         synth.triggerAttackRelease(velato.frequencylist[rootnote_idx + interval].freq, "8n", now+0.5*(i+time_offset));

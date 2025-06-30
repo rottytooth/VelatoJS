@@ -88,3 +88,6 @@ velato.token = function(lex) {
     }
 }
 
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = velato.token;
+}
