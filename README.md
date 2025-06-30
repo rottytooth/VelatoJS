@@ -2,5 +2,4 @@
 
 Hands-free programming. Write JavaScript by whistling.
 
-
-
+Very much in progress.

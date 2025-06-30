@@ -89,8 +89,35 @@ velato.web_display = (function() {
             document.getElementById("curr_cmd_notes").innerHTML = "";
     }
 
+    const write_full_program = (js_program) => {
+        let output = document.getElementById("program_txt");
+        output.innerHTML = js_program;
+    }
+
+    const feedback = function(desc, exp) {
+        var cmd = document.getElementById("feedback");
+        style = 'desc';
+        if (exp) style = 'exp';
+        cmd.innerHTML += ` <span class='${style}'>${desc}</span>`;
+    }
+
+    const clear_feedback = function() {
+        // FIXME: very possibly never called
+        var errs = document.getElementById("feedback");
+        errs.innerHTML = "";
+    }
+
+    const reset_display = function() {
+        root_display = document.getElementById("rootNote");
+        root_display.innerText = "";
+    }
+
     return {
         write_notes: write_notes,
-        clear_curr_command: clear_curr_command
+        clear_curr_command: clear_curr_command,
+        write_full_program: write_full_program,
+        feedback: feedback,
+        clear_feedback: clear_feedback,
+        reset_display: reset_display
     }
 })();

@@ -70,14 +70,7 @@ if (typeof module !== 'undefined' && module.exports) {
             // pre-load with command to set key
             _preset_to_change_key();
 
-            // call draw_tones when both command notes are loaded and page is loaded
-            if (document.readyState == 'complete') 
-                draw_tones(pr.lexicon);
-            else
-                window.addEventListener("load", function() {
-                    draw_tones(pr.lexicon);
-                });          
-            
+            if (ready_to_draw_tones) ready_to_draw_tones(pr.lexicon);
         };
         req_cmd_notes.send(null);
     }
@@ -229,7 +222,7 @@ if (typeof module !== 'undefined' && module.exports) {
         }
         if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
             //TODO: print what we're in to the screen
-            _feedback(`adding ${matchedpath["desc"]}`);
+            velato.web_display.feedback(`adding ${matchedpath["desc"]}`);
             return;
         }
         if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
@@ -262,7 +255,7 @@ if (typeof module !== 'undefined' && module.exports) {
         }
         if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
             //TODO: print what we're in to the screen
-            _feedback(`adding ${matchedpath["desc"]}`);
+            velato.web_display.feedback(`adding ${matchedpath["desc"]}`);
             return;
         }
         if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
@@ -277,17 +270,15 @@ if (typeof module !== 'undefined' && module.exports) {
 
 
     pr.write_js_program = function(stack) {
-        let output = document.getElementById("program_txt");
-
         let js_program = pr.beginning_program;
         if (pr.beginning_program) js_program += "\n";
         for(let i = 0; i < stack.length; i++) {
             js_program += stack[i].print();
         }
-        output.innerHTML = js_program;
+        velato.web_display.write_full_program(js_program);
     }
 
-    _get_note_list = function(node, set) {
+    const _get_note_list = function(node, set) {
         if (node.notes.length > 0)
             set.push.apply(set, node.notes);
         for(let i = 0; i < node.children.length; i++) {
@@ -296,23 +287,8 @@ if (typeof module !== 'undefined' && module.exports) {
         return set;
     }
 
-
-
-    const _feedback = function(desc, exp) {
-        var cmd = document.getElementById("feedback");
-        style = 'desc';
-        if (exp) style = 'exp';
-        cmd.innerHTML += ` <span class='${style}'>${desc}</span>`;
-    }
-
-    const _clear_feedback = function() {
-        var errs = document.getElementById("feedback");
-        errs.innerHTML = "";
-    }
-
     pr.reset_program = function() {
-        root_display = document.getElementById("rootNote");
-        root_display.innerText = "";
+        velato.web_display.reset_display();
         pr.root_note = null;
         key = "C";
         _preset_to_change_key();
@@ -337,7 +313,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
     // print instruction for next item we're expecting
     const _notate_child = function(cmd, expnum) {
-        _feedback(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
+        velato.web_display.feedback(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
     }
 
 })(velato.programbuilder)

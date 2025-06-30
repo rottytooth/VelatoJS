@@ -32,9 +32,27 @@ velato.web_display = (function() {
     const clear_curr_command = () => {
     }
 
+    var write_full_callback = undefined;
+
+    const feedback = (desc, exp) => {
+        console.log("Feedback: " + desc);
+    }
+
+    const clear_feedback = () => { }
+
+    const reset_display = () => {}
+
+    const write_full_program = (js_program) => {
+        if (write_full_callback) write_full_callback(js_program);
+    }
+
     return {
         write_notes: write_notes,
-        clear_curr_command: clear_curr_command
+        clear_curr_command: clear_curr_command,
+        write_full_program: write_full_program,
+        feedback: feedback,
+        clear_feedback: clear_feedback,
+        reset_display: reset_display
     }
 })();
 

@@ -79,7 +79,17 @@ function crawl_list(cmds, cmdlistdiv, tone_pattern) {
     }
 }
 
-// called from velato.programbuilder when tones are ready
+function ready_to_draw_tones(lexicon) {
+    // call draw_tones when both command notes are loaded and page is loaded
+    // called from velato.programbuilder
+    if (document.readyState == 'complete') 
+        draw_tones(lexicon);
+    else
+        window.addEventListener("load", function() {
+            draw_tones(lexicon);
+        });        
+}
+
 function draw_tones(cmd_list) {
     // not a div but emphasizes it is display-side
     var cmdlistdiv = document.getElementById("cmdlist");
