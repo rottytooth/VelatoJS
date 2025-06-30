@@ -1,64 +1,41 @@
+if (!velato) var velato = {};
 
 velato.programbuilder = {};
 /*
  * builds the js program
  * interprets individual notes
  * _print_output() writes to particular divs
+ * 
+ * THIS WORKS DIRECTLY WITH THE BROWSER 
+ * FIXME: output and formatting should be moved to a separate file
  */
 
-(function(pr) {
+if (typeof module !== 'undefined' && module.exports) { 
+    const { start } = require('node:repl');
+    const fs = require('node:fs'); // temporary, for testing
+
+    velato.c = require('./velato_constants');
+    velato.note = require('./velato_note');
+    velato.token = require('./velato_token');
+
+    // for node, this will replace the web display with the tester
+    velato.web_display = require('./velato_tester_display');
+}
+
+(function(pr) { 
     pr.beginning_program = '';
 
     pr.program_text = pr.beginning_program; // the entire text of the js program we're building
     
-    _cmd_stack = []; // stack of cmd tokens that have opened but not yet closed. A command is popped when we meet its closing bracket
+    const _cmd_stack = []; // stack of cmd tokens that have opened but not yet closed. A command is popped when we meet its closing bracket
 
-    _curr_cmd = undefined // placeholder for the command we are currently building
+    var _curr_cmd = undefined // placeholder for the command we are currently building
 
-    _full_program = []; // we build the velato program and js program from this
+    const _full_program = []; // we build the velato program and js program from this
 
     pr.root_note = null; // the current root note which we use to compare intervals
 
-
-    //#region load command notes
-    var req_cmd_notes = new XMLHttpRequest();
-    req_cmd_notes.overrideMimeType("application/json");
-    req_cmd_notes.open('GET', "lexicon.json", true);
-    req_cmd_notes.onload  = function() {
-        pr.lexicon = JSON.parse(req_cmd_notes.responseText);
-
-        // pre-load with command to set key
-        _preset_to_change_key();
-
-        // call draw_tones when both command notes are loaded and page is loaded
-        if (document.readyState == 'complete') 
-            draw_tones(pr.lexicon);
-        else
-            window.addEventListener("load", function() {
-                draw_tones(pr.lexicon);
-            });          
-        
-    };
-    req_cmd_notes.send(null);
-    //#endregion
-
-    //#region write events
-    var eventify_push = function(arr, callback) {
-        arr.push = function(e) {
-            Array.prototype.push.call(arr, e);
-            callback(arr);
-        };
-    };  
-
-    // update display of program each time a new token is pushed to the program list
-    eventify_push(_full_program, function(updatedArr) {
-        pr.write_notes("velato_program", updatedArr);
-        pr.write_js_program(updatedArr);
-    });
-
-    //#endregion
-
-    _preset_to_change_key = function() {
+    const _preset_to_change_key = function() {
         // program begins as if "change key" has been called
         // pre-load the stack with that scenario
         pr.reset_token();
@@ -70,8 +47,58 @@ velato.programbuilder = {};
             throw new Error("Attempting to create cmd obj without lexicon");
         _curr_cmd = new velato.token(pr.lexicon);
         _curr_cmd.indent = _cmd_stack.length;
-        document.getElementById("curr_cmd_notes").innerHTML = "";
+
+        velato.web_display.clear_curr_command();
     }
+
+    //#region load command notes
+    
+    if (typeof module !== 'undefined' && module.exports) {
+        // Node.js: load lexicon.json with fs
+        const fs = require('node:fs');
+        pr.lexicon = JSON.parse(fs.readFileSync('lexicon.json', 'utf8'));
+        // pre-load with command to set key
+        _preset_to_change_key();
+    } else {
+        // Browser: load lexicon.json with XMLHttpRequest
+        var req_cmd_notes = new XMLHttpRequest();
+        req_cmd_notes.overrideMimeType("application/json");
+        req_cmd_notes.open('GET', "lexicon.json", true);
+        req_cmd_notes.onload  = function() {
+            pr.lexicon = JSON.parse(req_cmd_notes.responseText);
+
+            // pre-load with command to set key
+            _preset_to_change_key();
+
+            // call draw_tones when both command notes are loaded and page is loaded
+            if (document.readyState == 'complete') 
+                draw_tones(pr.lexicon);
+            else
+                window.addEventListener("load", function() {
+                    draw_tones(pr.lexicon);
+                });          
+            
+        };
+        req_cmd_notes.send(null);
+    }
+    //#endregion
+
+    //#region write events
+    var _eventify_push = function(arr, callback) {
+        arr.push = function(e) {
+            Array.prototype.push.call(arr, e);
+            callback(arr);
+        };
+    };  
+
+    // update display of program each time a new token is pushed to the program list
+    _eventify_push(_full_program, function(updatedArr) {
+        velato.web_display.write_notes(true, updatedArr);
+        pr.write_js_program(updatedArr);
+    });
+
+    //#endregion
+
 
     // This is the main entry point -- given a note, it will update the _curr_cmd
     // and evaluate. returns bool to indicate program is complete
@@ -91,7 +118,7 @@ velato.programbuilder = {};
             // No, we need to add another note and re-test for completeness
             _curr_cmd.add_note(note);
             pr.check_cmd_token();
-            pr.write_notes("curr_cmd_notes", [_curr_cmd]); // display it
+            velato.web_display.write_notes(false, [_curr_cmd]); // display it
             return;
         }
 
@@ -108,7 +135,7 @@ velato.programbuilder = {};
                 pr.resolve_child(note, child);
         }
         // is child resolved?
-        let [parent, child] = _get_first_unresolved_child(_curr_cmd, _curr_cmd);
+        let [, child] = _get_first_unresolved_child(_curr_cmd, _curr_cmd);
 
         // no child returned, meaning command is DONE
         if (child === undefined) {
@@ -133,7 +160,7 @@ velato.programbuilder = {};
             pr.reset_token();
         }
 
-        pr.write_notes("curr_cmd_notes", [_curr_cmd]);
+        velato.web_display.write_notes(false, [_curr_cmd]);
 
         return false; // TODO: check for program completeness and return here
     }
@@ -269,88 +296,16 @@ velato.programbuilder = {};
         return set;
     }
 
-    /*
-     * Writes notes to the screen as a png
-     * 
-     * PARAMS
-     * element = where the png will be added
-     * stack = an array of velato.token command objects
-     */
-    pr.write_notes = function(element, commands) {
-        if (commands.length == 0) return; 
 
-        if (commands.length == 1 && commands[0].print().length == 0) return;
 
-        // clear curr cmd notes
-        document.getElementById(element).innerHTML = "";
-        
-        let notestxt = "";
-        let commandtxt = "";
-
-        let notecount = 0; // how many notes we have printed onto this line so far
-
-        const newlinestart = "tabstave notation=true tablature=false\nnotes "
-        let vextabstave_content = newlinestart;
-
-        for (let i = 0; i < commands.length; i++) {
-
-            let notelist = _get_note_list(commands[i], []);
-
-            if (notelist.length == 0) continue;
-
-            notecount += notelist.length;
-
-            if (notecount > velato.NOTES_PER_LINE && i > 0){
-                // start a new line if we've printed at least one measure on this line and adding the current measure would put us over the notes per line
-                vextabstave_content += notestxt + "\n" + commandtxt + "\n\noptions space=40\n\n" + newlinestart;
-                notecount = 0;
-                notestxt = "";
-                commandtxt = "";
-            }
-
-            if (commands[i].desc != undefined) {
-                if (commandtxt.length > 0)
-                    commandtxt += "\ntext ";
-                else
-                    commandtxt = "text ++,.1,:q,"; 
-                commandtxt += commands[i].desc + ",|";
-            }
-
-            notelist.forEach(not => {
-                notestxt += `${not.vexname} $${not.displayname}$`;
-            });
-
-            if (i <= commands.length - 1) {
-                notestxt += " |";        
-            }
-
-        };
-        
-        // add remaining notes and text for last line
-        vextabstave_content += notestxt + "\n" + commandtxt + "\n";
-
-        const VF = vextab.Vex.Flow;
-
-        const renderer = new VF.Renderer(document.getElementById(element),
-            VF.Renderer.Backends.SVG);
-            
-
-        // Initialize VexTab artist and parser
-        const artist = new vextab.Artist(10, 10, 750, { scale: 0.8 });
-        const tab = new vextab.VexTab(artist);
-
-        tab.parse(vextabstave_content);
-        artist.render(renderer);
-    }
-
-    _feedback = function(desc, exp) {
+    const _feedback = function(desc, exp) {
         var cmd = document.getElementById("feedback");
         style = 'desc';
         if (exp) style = 'exp';
         cmd.innerHTML += ` <span class='${style}'>${desc}</span>`;
     }
 
-    _clear_feedback = function() {
+    const _clear_feedback = function() {
         var errs = document.getElementById("feedback");
         errs.innerHTML = "";
     }
@@ -369,7 +324,7 @@ velato.programbuilder = {};
 
     // if there's an error in the command, we print it, and reset the command, so the
     // programmer can try again
-    _throw_error = function(msg, syntax) {
+    const _throw_error = function(msg, syntax) {
         pr.reset_token();
         if (msg == null || msg == "") {
             msg = "Could not determine command"; // default syntax error
@@ -381,8 +336,12 @@ velato.programbuilder = {};
     }
 
     // print instruction for next item we're expecting
-    _notate_child = function(cmd, expnum) {
+    const _notate_child = function(cmd, expnum) {
         _feedback(`Creating ${cmd["name"]} command. Add ${cmd.children[expnum]["desc"]}`);
     }
 
 })(velato.programbuilder)
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = velato.programbuilder;
+}
