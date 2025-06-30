@@ -1,6 +1,7 @@
+package.json
+package-lock.json
 crepe
 .DS_Store
 fonts
 fonts/*
 .vscode
-node_modules
