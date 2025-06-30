@@ -4,3 +4,4 @@ fonts
 fonts/*
 .vscode
 node_modules
+.LSOverride
