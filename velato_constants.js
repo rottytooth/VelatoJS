@@ -1,10 +1,8 @@
-if (!velato) var velato = {};
+var velato = {};
 
-velato.c = {};
+velato.NOTES_PER_LINE = 8;
 
-velato.c.NOTES_PER_LINE = 8;
-
-velato.c.INTERVALS = {
+velato.INTERVALS = {
     0: "root",
     1: "2nd",
     2: "2nd",
@@ -19,7 +17,7 @@ velato.c.INTERVALS = {
     11: "7th"
 }
 
-velato.c.INTERVALS_BY_NAME = {
+velato.INTERVALS_BY_NAME = {
     "root" : [0],
     "2nd" : [1,2],
     "3rd" : [3,4],
@@ -27,8 +25,4 @@ velato.c.INTERVALS_BY_NAME = {
     "5th" : [6,7],
     "6th" : [8,9],
     "7th" : [10,11]
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = velato.c;
 }

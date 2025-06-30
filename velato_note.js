@@ -1,11 +1,5 @@
-if (!velato) var velato = {};
 
-if (typeof module !== 'undefined' && module.exports) { 
-    const { start } = require('node:repl');
-    const fs = require('node:fs'); // temporary, for testing
-
-    velato.c = require('./velato_constants');
-}
+window.velato = window.velato || {}
 
 /*
  * A velato.note represents the note in several contexts:
@@ -74,7 +68,7 @@ velato.note = function(name, octave, freq, index, actual_frequency) {
 
             this.interval_semitones = diff;
 
-            this.interval = velato.c.INTERVALS[this.interval_semitones];
+            this.interval = velato.INTERVALS[this.interval_semitones];
         }
     }
     
@@ -188,6 +182,3 @@ velato.note.get_note_name = function(name, root) {
 }
     
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = velato.note;
-}

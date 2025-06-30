@@ -1,4 +1,5 @@
- if (!velato) var velato = {};
+
+window.velato = window.velato || {}
 
 /*
  * A velato.token is the basic parsing unit of the language
@@ -88,6 +89,3 @@ velato.token = function(lex) {
     }
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = velato.token;
-}
