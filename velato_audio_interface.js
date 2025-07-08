@@ -12,7 +12,10 @@ var velato_audio_interface = function () {
      * detecting a new pitch and passing to velato.programbuilder
      * reporting back errors from programbuilder
      * 
-     * It writes directly to some divs (e.g. currNote)
+     * It writes directly to some divs (e.g. currNote) and does some unrelated
+     * user interface stuff
+     * 
+     * FIXME: those should be moved to velato.web_display, now that we have it
      * 
      */
 
@@ -172,6 +175,7 @@ var velato_audio_interface = function () {
     }
 
     window.addEventListener("load", function() {
+        // FIXME: why is this in the audio interface?
 
         document.getElementById("stop").onclick = stopevent;
         document.getElementById("restart").onclick = reset_program;
