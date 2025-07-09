@@ -7,15 +7,12 @@ var velato_audio_interface = function () {
     /*
      * Velato Audio Interface is responsible for:
      *
-     * audio stream from the user
-     * starting, pausing, ending programs
-     * detecting a new pitch and passing to velato.programbuilder
-     * reporting back errors from programbuilder
-     * 
-     * It writes directly to some divs (e.g. currNote) and does some unrelated
-     * user interface stuff
-     * 
-     * FIXME: those should be moved to velato.web_display, now that we have it
+     * Handles audio stream from the user
+     * Detects a new pitch and passes to velato.programbuilder
+     * Reports back errors from programbuilder -- FXIME: this should be moved
+     *
+     * FIXME: It writes directly to some divs (e.g. currNote) and does some unrelated
+     * user interface stuff. That should be moved to velato.web_display
      * 
      */
 

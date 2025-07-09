@@ -89,6 +89,7 @@ function ready_to_draw_tones(lexicon) {
             draw_tones(lexicon);
         });        
 }
+velato.programbuilder.ready_to_draw_tones = ready_to_draw_tones;
 
 function draw_tones(cmd_list) {
     // not a div but emphasizes it is display-side

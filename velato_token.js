@@ -13,7 +13,7 @@ velato.token = function(lex) {
 
     this.notes = []; // set of velato.notes for the token -- the actual lexeme
 
-    this.sequence = []; // used for numerics or chars
+    this.sequence = []; // notes, as strings, for the note sequence -- populated first
 
     this._print = ""; // print before children
     this._postprint = ""; // print after children

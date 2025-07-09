@@ -2,12 +2,9 @@ if (!velato) var velato = {};
 
 velato.programbuilder = {};
 /*
- * builds the js program
- * interprets individual notes
- * _print_output() writes to particular divs
- * 
- * THIS WORKS DIRECTLY WITH THE BROWSER 
- * FIXME: output and formatting should be moved to a separate file
+ * Responsible for building js program from notes
+ *
+ * Communicates with velato.web_display (or mock) for browser interaction
  */
 
 if (typeof module !== 'undefined' && module.exports) { 
@@ -83,7 +80,7 @@ const ProgramBuilder = (function () {
                     // pre-load with command to set key
                     this.#preset_to_change_key();
 
-                    if (this.ready_to_draw_tones) this.ready_to_draw_tones(pr.lexicon);
+                    if (this.ready_to_draw_tones) this.ready_to_draw_tones(_lexicon);
                 };
                 req_cmd_notes.send(null);
             }
@@ -107,7 +104,6 @@ const ProgramBuilder = (function () {
                 }
                 velato.web_display.write_full_program(js_program);
             });
-
             //#endregion
 
             const resolve_child = function(note, token) {
@@ -284,7 +280,6 @@ const ProgramBuilder = (function () {
 
                 { // resolve child
                     let [, child] = this._get_first_unresolved_child(this._curr_cmd, this._curr_cmd);
-                    console.log(child);
 
                     if (child !== undefined)
                         resolve_child(note, child);
