@@ -2,11 +2,11 @@
 
 Hands-free programming. Write JavaScript by whistling.
 
-Built on the [https://github.com/rottytooth/Velato](original Velato language), but with a simplified grammar for whistling.
+Built on the [original Velato language](https://github.com/rottytooth/Velato), but with a simplified grammar for whistling.
 
 Very much in progress.
 
 Libraries:
-* [https://tonejs.github.io/](Tone.js)
-* [https://ml5js.org/](ML5.js)
-* [https://vexflow.com/vextab/](VexTab)
+* [Tone.js](https://tonejs.github.io/)
+* [ML5.js](https://ml5js.org/)
+* [VexTab](https://vexflow.com/vextab/)
