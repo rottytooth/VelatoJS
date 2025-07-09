@@ -13,7 +13,7 @@ velato.token = function(lex) {
 
     this.notes = []; // set of velato.notes for the token -- the actual lexeme
 
-    this.sequence = []; // used for numerics or chars
+    this.sequence = []; // notes, as strings, for the note sequence -- populated first
 
     this._print = ""; // print before children
     this._postprint = ""; // print after children
@@ -52,7 +52,7 @@ velato.token = function(lex) {
             for (let i = 0; i < val.children.length; i++) {
                 let new_child = new velato.token(this._lexicon);
                 child_lexpath = this.lexpath.map((x) => x); // clone
-                child_lexpath.push("children");
+                child_lexpath.push("children"); // ?
                 child_lexpath.push(i);
                 new_child.setlexpath(child_lexpath);
                 this.children.push(new_child);

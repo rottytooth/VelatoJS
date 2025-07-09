@@ -17,7 +17,7 @@ velato.note = function(name, octave, freq, index, actual_frequency) {
 
     // letter name of the note (with alternates when needed)
     // for notes with accidentals this includes BOTH equivalents (e.g. C# and Db)
-    this.name = name;
+     this.name = name;
 
     // which octave was sounded to create this note
     this.octave = octave;
