@@ -8,7 +8,7 @@
         "children": [
             {"node_type": "ChildToken",
             "token_type": "Tone",
-            "desc": "tone that will become the new root",
+            "desc": "tone to become new root",
             "notedesc": "New Root Tone",
             "print": "<span class='cmt'>// set root note to {varname}</span>\n"}
         ],
@@ -22,7 +22,7 @@
         "children": [
             {"node_type": "ChildToken",
             "token_type": "Tone",
-            "desc": "tone corresponding to a variable",
+            "desc": "tone for a variable",
             "print": "<span class='var'>{varname}</span> = "},
             {"node_type": "ChildToken",
             "token_type": "Exp",
@@ -148,7 +148,7 @@
             "children": [
                 {"node_type": "ChildToken",
                 "token_type": "Tone",    
-                "desc": "tone corresponding to a variable",
+                "desc": "tone for a variable",
                 "print": " {varname}"}
             ]
         },

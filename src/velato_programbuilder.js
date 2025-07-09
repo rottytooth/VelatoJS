@@ -16,7 +16,7 @@ if (typeof module !== 'undefined' && module.exports) {
     velato.token = require('./velato_token');
 
     // for node, this will replace the web display with the tester
-    velato.web_display = require('./tests/velato_tester_display');
+    velato.web_display = require('../tests/velato_tester_display');
 }
 
 const ProgramBuilder = (function () {
@@ -66,14 +66,14 @@ const ProgramBuilder = (function () {
             if (typeof module !== 'undefined' && module.exports) {
                 // Node.js: load lexicon.json with fs
                 const fs = require('node:fs');
-                _lexicon = JSON.parse(fs.readFileSync('lexicon.json', 'utf8'));
+                _lexicon = JSON.parse(fs.readFileSync('./src/lexicon.json', 'utf8'));
                 // pre-load with command to set key
                 this.#preset_to_change_key();
             } else {
                 // Browser: load lexicon.json with XMLHttpRequest
                 var req_cmd_notes = new XMLHttpRequest();
                 req_cmd_notes.overrideMimeType("application/json");
-                req_cmd_notes.open('GET', "lexicon.json", true);
+                req_cmd_notes.open('GET', "../src/lexicon.json", true);
                 req_cmd_notes.onload  = () => {
                     _lexicon = JSON.parse(req_cmd_notes.responseText);
 

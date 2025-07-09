@@ -7,7 +7,7 @@ if (typeof module !== 'undefined' && module.exports) {
     const { start } = require('node:repl');
     const fs = require('node:fs'); // temporary, for testing
 
-    velato.c = require('../velato_constants');
+    velato.c = require('../src/velato_constants');
 }
 
 velato.web_display = (function() {
