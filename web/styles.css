@@ -256,13 +256,13 @@ body, html {
 /* Column 4 */
 .col4 {
     flex: 0 0 250px;
+    overflow-y: scroll;
 }
 .instructions {
-    border-left: 5px solid var(--panel-back);
-    border-top: 5px solid var(--panel-back);
-    overflow-y: scroll;
+    border: 5px solid var(--panel-back);
     padding-top: 10px;
     padding-left: 10px;
+    margin-bottom: -20px;
 }
 .instructions ul, li {
     padding-left: 0;

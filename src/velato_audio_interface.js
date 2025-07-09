@@ -67,7 +67,7 @@ var velato_audio_interface = function () {
         // load list of notes
         var req = new XMLHttpRequest();
         req.overrideMimeType("application/json");
-        req.open('GET', "data/frequencies.json", true);
+        req.open('GET', "../data/frequencies.json", true);
         req.onload  = function() {
             var noteset = parse_notes(JSON.parse(req.responseText));
             velato.frequencylist = noteset;
@@ -91,7 +91,7 @@ var velato_audio_interface = function () {
     function start_microphone(stream){
 
         pitch_detect = ml5.pitchDetection(
-        "./crepe/",
+        "../lib/crepe", // path from where it's loaded (web folder)
         audioContext,
         stream,
         streamStarted

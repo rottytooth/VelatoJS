@@ -1,12 +1,12 @@
-const { ProgramBuilder } = require('../velato_programbuilder');
+const { ProgramBuilder } = require('../src/velato_programbuilder');
 
 if (!velato) var velato = {};
 
-velato.c = require('../velato_constants');
-velato.note = require('../velato_note');
-velato.token = require('../velato_token');
-velato.programbuilder = require('../velato_programbuilder').programbuilder;
-velato.ObjPb = require('../velato_programbuilder').ObjPb;
+velato.c = require('../src/velato_constants');
+velato.note = require('../src/velato_note');
+velato.token = require('../src/velato_token');
+velato.programbuilder = require('../src/velato_programbuilder').programbuilder;
+velato.ObjPb = require('../src/velato_programbuilder').ObjPb;
 velato.web_display = require('./velato_tester_display');
 
 // beforeEach(() => {
