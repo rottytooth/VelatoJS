@@ -143,3 +143,65 @@ test('reset: first following note sets root', () => {
     expect(root_note).toBeDefined();
     expect(root_note.name).toBe("C♯ / D♭");
 });
+
+test('let: command only', () => {
+
+    velato.web_display.write_full_callback = (js_program) => {
+        output = js_program;
+    };
+
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        final_version = commands[0].name;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("C♯ / D♭",6));
+
+    expect(final_version).toBeDefined();
+    expect(final_version).toBe("Let");
+});
+
+test('while: command only', () => {
+
+    velato.web_display.write_full_callback = (js_program) => {
+        output = js_program;
+    };
+
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        final_version = commands[0].name;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6));
+
+    expect(final_version).toBeDefined();
+    expect(final_version).toBe("While");
+});
+
+test('EndBlock: command only', () => {
+
+    velato.web_display.write_full_callback = (js_program) => {
+        output = js_program;
+    };
+
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        final_version = commands[0].name;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("G",6));
+    pb.add_tone(get_note("G",6));
+    pb.add_tone(get_note("B",6));
+
+    expect(final_version).toBeDefined();
+    expect(final_version).toBe("EndBlock");
+});

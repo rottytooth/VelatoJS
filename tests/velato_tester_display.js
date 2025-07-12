@@ -13,7 +13,7 @@ if (typeof module !== 'undefined' && module.exports) {
 velato.web_display = (function() {
     // Responsible for all user feedback and display of the program
 
-        /*
+    /*
      * Writes notes to the screen as a png
      * 
      * PARAMS
@@ -26,6 +26,9 @@ velato.web_display = (function() {
 
         if (commands.length == 1 && commands[0].print().length == 0) return;
 
+        if (velato.web_display.write_notes_callback) {
+            velato.web_display.write_notes_callback(final_program, commands);
+        }
         // do some reporting of what was sent
     }
 
