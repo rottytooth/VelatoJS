@@ -47,13 +47,18 @@ velato.token = function(lex) {
             this.resolved = true;
         }
 
-        // child nodes are their own copy, to track if they are complete
+        // we should store the expected children here, to then fill with subsequent notes
         if (val.children !== undefined) {
             for (let i = 0; i < val.children.length; i++) {
                 let new_child = new velato.token(this._lexicon);
-                child_lexpath = this.lexpath.map((x) => x); // clone
-                child_lexpath.push("children"); // ?
+
+                // build out the lexpath as the current node's lexpath plus what is needed to match
+                // where the child node falls in the lexicon
+                // e.g. ["Cmds", "Tone"] becomes ["Cmds", "Tone", "children", "0"]
+                child_lexpath = this.lexpath.map((x) => x);
+                child_lexpath.push("children");
                 child_lexpath.push(i);
+
                 new_child.setlexpath(child_lexpath);
                 this.children.push(new_child);
             }

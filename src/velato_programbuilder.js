@@ -41,7 +41,7 @@ const ProgramBuilder = (function () {
         }
 
         // if there's an error in the command, we print it, and reset the command, so the programmer can try again
-        _throw_error(msg, syntax) {
+        throw_error(msg, syntax) {
             this.reset_token();
             if (msg == null || msg == "") {
                 msg = "Could not determine command"; // default syntax error
@@ -66,14 +66,14 @@ const ProgramBuilder = (function () {
             if (typeof module !== 'undefined' && module.exports) {
                 // Node.js: load lexicon.json with fs
                 const fs = require('node:fs');
-                _lexicon = JSON.parse(fs.readFileSync('./src/lexicon.json', 'utf8'));
+                _lexicon = JSON.parse(fs.readFileSync('./data/lexicon.json', 'utf8'));
                 // pre-load with command to set key
                 this.#preset_to_change_key();
             } else {
                 // Browser: load lexicon.json with XMLHttpRequest
                 var req_cmd_notes = new XMLHttpRequest();
                 req_cmd_notes.overrideMimeType("application/json");
-                req_cmd_notes.open('GET', "../src/lexicon.json", true);
+                req_cmd_notes.open('GET', "../data/lexicon.json", true);
                 req_cmd_notes.onload  = () => {
                     _lexicon = JSON.parse(req_cmd_notes.responseText);
 
@@ -102,11 +102,11 @@ const ProgramBuilder = (function () {
                 for(let i = 0; i < updatedArr.length; i++) {
                     js_program += updatedArr[i].print();
                 }
-                velato.web_display.write_full_program(js_program);
+                velato.web_display.write_full_program(_full_program, js_program);
             });
             //#endregion
 
-            const resolve_child = function(note, token) {
+            this.resolve_child = function(note, token) {
 
                 token.notes.push(note);
 
@@ -124,7 +124,7 @@ const ProgramBuilder = (function () {
                         }
                         break;
                     case "Exp": // add an expression to the stack or complete it
-                        check_exp_token(note, token);
+                        this.check_exp_token(note, token);
                         break;
                     case "Tone": // a single tone as identifier
                         token.sequence.push(note.varname);
@@ -133,7 +133,7 @@ const ProgramBuilder = (function () {
                 }
             }
 
-            this._get_first_unresolved_child = function(parent, cmd) {
+            this._get_first_unresolved_child = function(cmd) {
                 // get the first child still hungry for more notes
                 // we do not look at the command itself (which is always true)
 
@@ -143,55 +143,16 @@ const ProgramBuilder = (function () {
                         if (!cmd.children[i].resolved && 
                             (cmd.children[i].children === undefined ||
                                 cmd.children[i].children.length == 0)) {
-                            return [cmd, cmd.children[i]];
+                            return cmd.children[i];
                         // else if it has children, test those
                         } else if (cmd.children[i].children !== undefined &&
                             cmd.children[i].children.length > 0) {
-                                return this._get_first_unresolved_child(cmd, cmd.children[i]);
+                                return this._get_first_unresolved_child(cmd.children[i]);
                         }
                     }
-                    return [undefined, undefined];
+                    return undefined;
                 }
             }
-
-            // const write_js_program = function(stack) {
-            //     let js_program = this.beginning_program;
-            //     if (this.beginning_program) js_program += "\n";
-            //     for(let i = 0; i < stack.length; i++) {
-            //         js_program += stack[i].print();
-            //     }
-            //     velato.web_display.write_full_program(js_program);
-            // }
-
-
-            // build toward a command
-            this.check_exp_token = function(note, token) {
-
-                let path = ["Exp"]; // set for exp only
-
-                for(let i = 0; i < this._curr_cmd.notes.length; i++) // build path from intervals
-                    path.push(token.notes[i].interval);
-
-                matchedpath = path.reduce((o, n) => o[n], pr.lexicon)
-
-                if (matchedpath == undefined) {
-                    // we have hit a sequence not in the lexicon
-                    _throw_error("Invalid note sequence, resetting line", true);
-                }
-                if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
-                    //TODO: print what we're in to the screen
-                    velato.web_display.feedback(`adding ${matchedpath["desc"]}`);
-                    return;
-                }
-                if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
-                    // we are in a proper sequence but not at a token (end node)
-                    return;
-                }
-                    
-                matchedpath = structuredClone(matchedpath);
-                this.this._curr_cmd.notes = token.notes; // is this right?
-                this.this._curr_cmd.children.push(matchedpath);
-            }    
 
 
             // print instruction for next item we're expecting
@@ -216,6 +177,35 @@ const ProgramBuilder = (function () {
 
                 velato.web_display.reset_display();
             }
+
+            
+            // build toward an expression
+            this.check_exp_token = function(note, token) {
+                let path = ["Exp"];
+
+                ntok = new velato.token(_lexicon);
+
+                for(let i = 0; i < token.notes.length; i++)
+                    path.push(token.notes[i].interval);
+
+                let matchedpath = path.reduce((o, n) => o[n], _lexicon)
+                if (matchedpath == undefined) {
+                    this.throw_error("Invalid note sequence, resetting line", true);
+                }
+                if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
+                    velato.web_display.feedback(`adding ${matchedpath["desc"]}`);
+                    return;
+                }
+                if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
+                    return;
+                }
+                // ntok.notes = token.notes;
+                // ntok.setlexpath(path);
+                // this._curr_cmd.children.push(ntok);
+
+                token.setlexpath(path);
+            }
+
             
             // build toward a command
             this.check_cmd_token = function() {
@@ -229,10 +219,10 @@ const ProgramBuilder = (function () {
 
                 if (matchedpath == undefined) {
                     // we have hit a sequence not in the lexicon
-                    _throw_error("Invalid note sequence, resetting line", true);
-                }
+                    this.throw_error("Invalid note sequence, resetting line", true);
+                }   
                 if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
-                    //TODO: print what we're in to the screen
+                    //TODO: we have a category but not yet the command, so we print what we have
                     velato.web_display.feedback(`adding ${matchedpath["desc"]}`);
                     return;
                 }
@@ -241,26 +231,26 @@ const ProgramBuilder = (function () {
                     return;
                 }
 
+                // having a lexpath means the command is fully set
                 this._curr_cmd.setlexpath(path);
 
                 if (matchedpath["name"] == "EndBlock") {
                     _cmd_stack.pop(); // pop the last command
                     //FIXME: do we do this here?
-
                 } 
             }
 
-            // This is the main entry point -- given a note, it will update the this._curr_cmd 
-            // and evaluate. returns bool to indicate program is complete
+            // This is the main entry point -- given a note, it will update the this._curr_cmd and evaluate. returns bool to indicate program is complete
             this.add_tone = function(note) {
 
-                // this sets the root for the current note, in order to determine its interval
-                note.set_root(this.root_note); // if there is no root_note, this will be undefined
+                if (this.root_note) {
+                    note.set_root(this.root_note);
+                }
 
                 // report tone to screen
                 let root_str = "";
                 if (this.root_note != undefined) {
-                    root_str = `, root note: ${this.root_note.with_octave()}`;
+                    root_str = `, root note: ${this.root_note.displayname}`;
                 }
                 console.log(`registering ${note.with_octave()}${root_str}`);
                 
@@ -275,28 +265,29 @@ const ProgramBuilder = (function () {
 
                 // Yes, so we must be building its children (tones, expressions, etc)
                 if (this._curr_cmd.children.length == 0) {
-                    _throw_error("This note does not lead to a valid command", true); 
+                    this.throw_error("This note does not lead to a valid command", true); // FIXME: does this ever happen?
                 }
 
-                { // resolve child
-                    let [, child] = this._get_first_unresolved_child(this._curr_cmd, this._curr_cmd);
-
-                    if (child !== undefined)
-                        resolve_child(note, child);
+                // resolve child
+                let child = this._get_first_unresolved_child(this._curr_cmd);
+                if (child !== undefined) {
+                    this.resolve_child(note, child);
+                    child = this._get_first_unresolved_child(this._curr_cmd);
                 }
-                // is child resolved?
-                let [, child] = this._get_first_unresolved_child(this._curr_cmd, this._curr_cmd);
 
                 // no child returned, meaning command is DONE
                 if (child === undefined) {
-
-                    // SOME COMMANDS affect the lexing of the program. Deal with that now
 
                     //TODO: if it's an undo, handle it now!
 
                     // if it's a root note, set that rootnote
                     if (this._curr_cmd.name == "SetRoot" && this._curr_cmd.children.length > 0 && this._curr_cmd.children[0].notedesc == "New Root Tone") {
                         this.root_note = this._curr_cmd.children[0].notes[0];
+
+                        // now that we have a root note, that note must itself be set as root
+                        this.root_note.set_root(this.root_note);
+
+                        console.log(`registered now as ${note.with_octave()}${root_str}`);
                     }
 
                     // move to the final program
@@ -312,7 +303,7 @@ const ProgramBuilder = (function () {
 
                 velato.web_display.write_notes(false, [this._curr_cmd]);
 
-                return false; // TODO: check for program completeness and return here
+                // return false; // TODO: check for program completeness and return here
             }
         }
     }

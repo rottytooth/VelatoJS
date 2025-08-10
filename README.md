@@ -1,4 +1,4 @@
-<h1 align="center">Velato</h1>
+<h1 align="center">Velato, Hands-Free</h1>
 
 Hands-free programming. Write JavaScript by whistling.
 
@@ -10,3 +10,4 @@ Libraries:
 * [Tone.js](https://tonejs.github.io/)
 * [ML5.js](https://ml5js.org/)
 * [VexTab](https://vexflow.com/vextab/)
+

@@ -20,6 +20,9 @@ var velato_audio_interface = function () {
     let SPACE_BETWEEN_NOTES = 1; // This times SAMPLE_MS sets how much time we need before a note is considered the next one
     let MIN_LENGTH_OF_NOTE = 2; // This times SAMPLE_MS is how long a note must be sounded before it is considered intentional
 
+    let LOW_OCTAVE = 5; // lowest octave we will accept
+    let HIGH_OCTAVE = 6; // highest octave we will accept
+
     const BUILTINS = 
         "const output = document.getElementById('output');\n" +
         "function print(content) { output.innerText += content; } \n\n";
@@ -228,7 +231,7 @@ var velato_audio_interface = function () {
                 check_for_end_of_note();
                 return;
             }
-            if (note.octave > 4 && note.octave < 7) {
+            if (note.octave >= LOW_OCTAVE && note.octave <= HIGH_OCTAVE) {
                 write(`<span style="color: var(--focus-emphasis)">NOTE: ${note.name} ${note.octave}</span>`, true);
                 process_note(note, noteset);
             }
