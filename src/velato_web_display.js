@@ -97,7 +97,7 @@ velato.web_display = (function() {
             document.getElementById("curr_cmd_notes").innerHTML = "";
     }
 
-    const write_full_program = (js_program) => {
+    const write_full_program = (full_program, js_program) => {
         let output = document.getElementById("program_txt");
         output.innerHTML = js_program;
     }
