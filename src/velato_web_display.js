@@ -12,12 +12,12 @@ let DEBUG = true;
 velato.web_display = (function() {
     // Responsible for all user feedback and display of the program
 
-        // Generator to iterate over notes in a notelist
-        function* noteIterator(notelist) {
-            for (let note of notelist) {
-                yield note;
-            }
+    // Generator to iterate over notes in a notelist
+    function* noteIterator(notelist) {
+        for (let note of notelist) {
+            yield note;
         }
+    }
 
     const _get_note_list = function(node, set) {
         if (node.notes.length > 0) {
@@ -49,7 +49,7 @@ velato.web_display = (function() {
 
             if (notelist.length == 0) continue;
 
-            notecount += notelist.length; // increase number of notes we're putting in this measure
+            notecount += notelist.length;
 
             if (notecount > velato.c.NOTES_PER_LINE && i > 0){
                 // start a new line if we've printed at least one measure on this line and adding the current measure would put us over the notes per line
@@ -65,24 +65,24 @@ velato.web_display = (function() {
                 else
                     commandtxt = "text ++,.1,:q,"; 
             }
-
+            let lastIsBlank = false;
             let isFirstNote = true;
             for (let note of noteIterator(notelist)) {
                 notestxt += `${note.vexname} $${note.displayname}$`;
                 if (isFirstNote) {
+                    // This is the first note, so we put command name
                     if (commands[i].desc != undefined) {
-                        commandtxt += commands[i].desc + ",|";
+                        commandtxt += commands[i].desc;
                     }
                     isFirstNote = false;
                 } else {
                     commandtxt += ", ";
-                    // we're going through notes here, not children
-                    if (commands[i].type != "Tone") {
-                        // get notes 
-                        // print commands[i]
-                    }
-                    // FIXME: check here for expression to add
+                    commandtxt += note.exp_name || "";
+                    lastIsBlank = !note.exp_name;
                 }
+            }
+            if (lastIsBlank) {
+                commandtxt += "|";
             }
 
             if (i <= commands.length - 1) {
@@ -152,9 +152,11 @@ velato.web_display = (function() {
         if (typeof document == 'undefined') return;
         let output = document.getElementById("program_txt");
         output.innerHTML = js_program;
-    }
+    }   
 
     const feedback = function(desc, exp) {
+        if (typeof document == 'undefined') return;
+
         var cmd = document.getElementById("feedback");
         style = 'desc';
         if (exp) style = 'exp';
