@@ -10,8 +10,9 @@
             "token_type": "Tone",
             "desc": "tone to become new root",
             "notedesc": "New Root Tone",
-            "print": "<span class='cmt'>// set root note to {varname}</span>\n"}
+            "print": "{notename}"}
         ],
+        "print": "<span class='cmt'>// set root note to {exp}</span>",
         "childCmds": false
     },
     "3rd": {
@@ -22,13 +23,13 @@
         "children": [
             {"node_type": "ChildToken",
             "token_type": "Tone",
-            "desc": "tone for a variable",
-            "print": "<span class='var'>{varname}</span> = "},
+            "print": "{varname}",
+            "desc": "tone for a variable"},
             {"node_type": "ChildToken",
             "token_type": "Exp",
-            "desc": "expression",
-            "postprint": ";"}
+            "desc": "expression"}
         ],
+        "print": "<span class='var'>{exp}</span> = {exp};",
         "childCmds": false
     },
     "root": {
@@ -47,12 +48,11 @@
             "node_type": "Token",
             "token_type": "Cmd",
             "name": "While",
-            "print": "<span class='key'>while</span> (",
+            "print": "<span class='key'>while</span> ({exp}) {",
             "children": [
                 {"node_type": "ChildToken",
                 "token_type": "Exp",
-                "desc": "Expression",
-                "postprint": " {"}
+                "desc": "Expression"}
             ],
             "childCmds": true
         },
@@ -68,12 +68,11 @@
             "node_type": "Token",
             "token_type": "Cmd",
             "name": "If",
-            "print": "<span class='key'>if</span> (",
+            "print": "<span class='key'>if</span> ({exp}) {",
             "children": [
                 {"node_type": "ChildToken",
                 "token_type": "Exp",
-                "desc": "Expression",
-                "postprint": " {"}
+                "desc": "Expression"}
             ],
             "childCmds": true
         },
@@ -94,20 +93,19 @@
             "children": [
                 {"node_type": "ChildToken",
                 "token_type": "Tone",    
-                "desc": "Variable to store input",
-                "print": "let {varname} = get_input();"}
-            ]
+                "desc": "Variable to store input"}
+            ],
+            "print": "let {varname} = get_input();"
         },
         "5th": {
             "node_type": "Token",
             "token_type": "Cmd",    
             "name": "Print",
-            "print": "print(",
+            "print": "print({exp});",
             "children": [
                 {"node_type": "ChildToken",
                 "token_type": "Exp",
-                "desc": "Expression",
-                "postprint": ";"}
+                "desc": "Expression"}
             ]
         }
     },
@@ -150,7 +148,8 @@
                 "token_type": "Tone",    
                 "desc": "tone for a variable",
                 "print": " {varname}"}
-            ]
+            ],
+            "print": "<span class='var'>{exp}</span>"
         },
         "3rd": {
             "node_type": "Token",
@@ -186,7 +185,8 @@
                 "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": " {seq_int}"}
-            ]
+            ],
+            "print":"{exp}"
         },
         "6th": {
             "node_type": "Token",
@@ -197,12 +197,13 @@
                 {"node_type": "ChildToken",
                 "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
-                "print": " {seq_int}"},
+                "print": "{seq_int}"},
                 {"node_type": "ChildToken",
                 "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
                 "print": ".{seq_int} "}
-            ]
+            ],
+            "print": "{exp}"
         },
         "7th": {
             "node_type": "Token",
@@ -213,12 +214,13 @@
                 {"node_type": "ChildToken",
                 "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
-                "print": " {seq_int}"},
+                "print": "{seq_int}"},
                 {"node_type": "ChildToken",
                 "token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
-                "print": ".{seq_int} "}
-            ]
+                "print": ".{seq_int}"}
+            ],
+            "print": "-{exp}"
         }
     },
     "3rd": {

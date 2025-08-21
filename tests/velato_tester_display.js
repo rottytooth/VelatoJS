@@ -13,6 +13,10 @@ if (typeof module !== 'undefined' && module.exports) {
 velato.web_display = (function() {
     // Responsible for all user feedback and display of the program
 
+    var write_notes_callback = null;
+
+    var write_full_callback = null;
+
     /*
      * Writes notes to the screen as a png
      * 
@@ -56,7 +60,9 @@ velato.web_display = (function() {
         write_full_program: write_full_program,
         feedback: feedback,
         clear_feedback: clear_feedback,
-        reset_display: reset_display
+        reset_display: reset_display,
+        write_notes_callback: write_notes_callback,
+        write_full_callback: write_full_callback
     }
 })();
 
