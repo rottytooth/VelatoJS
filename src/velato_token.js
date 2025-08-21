@@ -1,4 +1,4 @@
- if (!velato) var velato = {};
+if (!velato) var velato = {};
 
 /*
  * A velato.token is the basic parsing unit of the language
@@ -76,20 +76,19 @@ velato.token = function(lex) {
             for(let i = 0; i < this.indent;i++)
                 retstr += "\t";
 
-        if (this._print !== undefined) // this can happen if lexicon.json is lacking it
-            retstr += this._print.replace("{varname}", this.sequence[0])
-                .replace("{seq_int}", this.sequence.join())
-                .replace("{seq_char}", String.fromCharCode(this.sequence.join()));
+        let printStr = this._print || "";
 
-            // recursively go through children (but not child commands) and print
-        for(let i = 0; i < this.children.length;i++) {
-            retstr += this.children[i].print();
+        for (let i = 0; i < this.children.length; i++) {
+            let child = this.children[i];
+            printStr = printStr.replace(`{exp}`, child.print());
         }
+        if (this.notes.length > 0 && this.notes[0].name)
+            printStr = printStr.replace("{notename}", this.notes[0].name);
+        printStr = printStr.replace("{varname}", this.sequence[0]);
+        printStr = printStr.replace("{seq_int}", parseInt(this.sequence.join(""), 10).toString());
+        printStr = printStr.replace("{seq_char}", String.fromCharCode(...this.sequence));
 
-        if (this._postprint !== undefined)
-            retstr += this._postprint;
-
-        return retstr;
+        return printStr;
     }
 }
 

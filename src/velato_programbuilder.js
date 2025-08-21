@@ -16,11 +16,19 @@ if (typeof module !== 'undefined' && module.exports) {
     velato.token = require('./velato_token');
 
     // for node, this will replace the web display with the tester
-    velato.web_display = require('../tests/velato_tester_display');
+    testd = require('../tests/velato_tester_display');
+    webd = require('./velato_web_display');
 }
 
-const ProgramBuilder = (function () {
+const ProgramBuilder = (function (useweb) {
     var _program_text = ''; // the entire text of the js program we're building
+
+    if (typeof module !== 'undefined' && module.exports) {
+        if (useweb)
+            velato.web_display = webd;
+        else
+            velato.web_display = testd;
+    }
     
     var _lexicon = undefined; // the lexicon of commands and expressions, loaded from lexicon.json
 
@@ -61,9 +69,19 @@ const ProgramBuilder = (function () {
             velato.web_display.clear_curr_command();
         }
 
-        constructor() {
+        constructor(useweb) {
+
+            // clear _full_program
+            // FIXME: This should not be necessary, it shows that _full_program
+            // is a static object shared across instances, which is not what we want...
+            _full_program.splice(0, _full_program.length);
 
             if (typeof module !== 'undefined' && module.exports) {
+                if (useweb)
+                    velato.web_display = webd;
+                else
+                    velato.web_display = testd;
+
                 // Node.js: load lexicon.json with fs
                 const fs = require('node:fs');
                 _lexicon = JSON.parse(fs.readFileSync('./data/lexicon.json', 'utf8'));
@@ -100,7 +118,7 @@ const ProgramBuilder = (function () {
                 let js_program = velato.programbuilder.BEG_PROGRAM;
                 if (velato.programbuilder.BEG_PROGRAM) js_program += "\n";
                 for(let i = 0; i < updatedArr.length; i++) {
-                    js_program += updatedArr[i].print();
+                    js_program += updatedArr[i].print() + "\n";
                 }
                 velato.web_display.write_full_program(_full_program, js_program);
             });
@@ -183,7 +201,7 @@ const ProgramBuilder = (function () {
             this.check_exp_token = function(note, token) {
                 let path = ["Exp"];
 
-                ntok = new velato.token(_lexicon);
+                // ntok = new velato.token(_lexicon);
 
                 for(let i = 0; i < token.notes.length; i++)
                     path.push(token.notes[i].interval);
@@ -286,6 +304,10 @@ const ProgramBuilder = (function () {
 
                         // now that we have a root note, that note must itself be set as root
                         this.root_note.set_root(this.root_note);
+
+                        if (this.root_note != undefined) {
+                            root_str = `, root note: ${this.root_note.displayname}`;
+                        }
 
                         console.log(`registered now as ${note.with_octave()}${root_str}`);
                     }
