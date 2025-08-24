@@ -331,7 +331,36 @@ test('Print: variable with assigned variable name', () => {
     expect(fc_str).toContain("var_E");
 });
 
-test('Let: assign PositiveInt: Prints Correctly', () => {
+test('Let: assign PositiveInt: has correct value', () => {
+    let full_program = [];
+
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("C",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("E",6)); // variable E
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    let final_cmd = full_program[full_program.length - 1];
+
+    // assigned to the correct variable
+    let fc_str = final_cmd.print();
+    expect(fc_str).toContain("class='var'");
+    expect(fc_str.replace(/\s/g, "")).toContain("= 444;".replace(/\s/g, ""));
+});
+
+test('Let: assign PositiveInt: prints correctly', () => {
 
     let full_program = [];
 
@@ -360,4 +389,78 @@ test('Let: assign PositiveInt: Prints Correctly', () => {
     expect(fc_str).toContain("class='var'");
     expect(fc_str).toContain("var_Cs_Db");
     expect(fc_str).toContain("3");
+});
+
+test('Let: assign PositiveInt: prints correctly 2', () => {
+
+    let full_program = [];
+
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("F",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("F",6));
+    pb.add_tone(get_note("G♯ / A♭",6));
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("C",6));
+
+    let final_cmd = full_program[full_program.length - 1];
+
+    // assigned to the correct variable
+    let fc_str = final_cmd.print();
+    expect(fc_str).toContain("class='var'");
+    expect(fc_str).toContain("var_As_Bb");
+    expect(fc_str).toContain("-5");
+});
+
+test('Let: comparison', () => {
+    let full_program = [];
+    let final_cmds = [];
+
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        final_cmds = commands;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("C",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("E",6)); // variable E
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("E",6)); // plus
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("A",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    let final_cmd = full_program[full_program.length - 1];
+
+    // assigned to the correct variable
+    let fc_str = final_cmd.print();
+    expect(fc_str).toContain("class='var'");
+    expect(fc_str.replace(/\s/g, "")).toContain("=(444 + 257);".replace(/\s/g, ""));
 });

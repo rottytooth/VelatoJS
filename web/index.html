@@ -45,10 +45,10 @@
             <div id="controls">
                 <div id="stop" class="button">PAUSE</div>
                 <div id="restart" class="button">RESET</div>
-                <div id="remove" class="button">UNDO</div>
+                <!-- <div id="remove" class="button">UNDO</div> -->
             </div>
             <div style="flex-direction: column; display:flex; height:100%;">
-                <div class="notes_header">Current Token</div>
+                <div class="notes_header">Current Command</div>
                 <div id="curr_cmd_notes">
                 </div>
                 <div id="notes_row1" style="height:20%">
@@ -64,9 +64,9 @@
             <div id="js-program">JS Program
                 <pre><code class="language-javascript" id="program_txt"></code></pre>
             </div>
-            <div id="js-output">Program Output
+            <!-- <div id="js-output">Program Output
                 <div id="output"></div>
-            </div>
+            </div> -->
         </div>
         <div class="col4 box">
             <div style="padding-bottom: 20px;">
@@ -83,7 +83,7 @@
             <ul id="cmdlist"></ul>
 
             <h3>Expressions</h3>
-            <p>All expressions end with ")", a "(" is implied at the beginning of each expression</p>
+            <p>all expressions are prefix</p>
 
             <ul id="explist"></ul>
 
@@ -92,11 +92,14 @@
         </div>
     </div>
 </div><div id="modal"><div id="modal_content"><span class="close" id='close'>&times;</span>HOW TO WHISTLE A PROGRAM<br/>
-    <p><b>NOTE: If you're using a headset, there's a good chance it is noise-cancelling and will cancel all your whistling!</b></p>
-    <p>First, whistle a single note to set the initial key. Until you change key, all intervals will be in terms of that note.</p>
-    <p>The input stream to the left shows any sound the interpreter thinks might be a whistle. A note needs to hold for more than half a second (three consecutive appearances in the stream) before it registers. It will not register until it breaks off (for at least 200 milliseconds). That means that, if you start a note off-key, you can let it drift to the correct pitch; just hold the final note for a moment.</p>
-    <p>If you are not sure how to sound a command or expression, try the play buttons in the Lexicon. Most combinations have more than one possibility: major/minor or perfect/diminished. The play button will play both.</p>
-    <p>The whistling of a Velato program gets easier with practice, and it may help keep you in tune!</p>
+    <ol>
+        <li>If you have a headset, do not use it! Use your device's microphone instead. Your headset is likely noise-cancelling and will cancel your whistling.</li>
+        <li>Whistle a note very briefly, and watch it show up in the input stream.  Push the pitch up and down to what you want. Hold it long enough and it registers as part of the program.</li>
+        <li>Whistle your first note to set the initial root. All intervals are in terms of that root.</li>
+        <li>Continue whistling your program. Keep in mind that this language has a different grammar from the original Velato and from JS. For one thing, all operators are prefix. To add two numbers, whistle plus then the first, then the second. You can replace either with another expression.</li>
+        <li>If you can't find the note, try the play buttons in the Lexicon. Most combinations have more than one possibility: major/minor or perfect/diminished. The play button will play both.</li>
+        <li>Keep whistling programs to improve your pitch!</li>
+    </ol>
 </div>
 </div>
 </div><div id="loading_modal"><div id="modal_content">LOADING AUDIO STREAM...</div></div>

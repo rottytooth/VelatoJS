@@ -179,7 +179,7 @@ var velato_audio_interface = function () {
 
         document.getElementById("stop").onclick = stopevent;
         document.getElementById("restart").onclick = reset_program;
-        document.getElementById("remove").onclick = velato.programbuilder.remove_last_line;
+        // document.getElementById("remove").onclick = velato.programbuilder.remove_last_line;
 
         document.getElementById("modal").onclick = close_modal;
         document.getElementById("modal_content").onclick = block_close_modal;

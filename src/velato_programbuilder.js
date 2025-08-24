@@ -34,6 +34,7 @@ const ProgramBuilder = (function (useweb) {
 
     const _cmd_stack = []; // stack of cmd tokens that have opened but not yet closed. A command is popped when we meet its closing bracket
 
+
     // var this._curr_cmd = undefined; // placeholder for the command we are currently building
 
     const _full_program = []; // we build the velato program and js program from this
@@ -118,7 +119,7 @@ const ProgramBuilder = (function (useweb) {
                 let js_program = velato.programbuilder.BEG_PROGRAM;
                 if (velato.programbuilder.BEG_PROGRAM) js_program += "\n";
                 for(let i = 0; i < updatedArr.length; i++) {
-                    js_program += updatedArr[i].print() + "\n";
+                    js_program += updatedArr[i].print(false) + "\n";
                 }
                 velato.web_display.write_full_program(_full_program, js_program);
             });
@@ -151,9 +152,27 @@ const ProgramBuilder = (function (useweb) {
                 }
             }
 
+            // this._check_even_parens = (token) => {
+            //     // if the ExpSet has the same number of openparens and close parens, we mark as complete
+            //     let open = 0;
+            //     let close = 0;
+            //     for (let i = 0; i < token.children.length; i++) {
+            //         if (token.children[i].name == "OpenParens") open++;
+            //         if (token.children[i].name == "CloseParens") close++;
+            //     }
+            //     if (open == close) {
+            //         token.resolved = true;
+            //         return true;
+            //     }
+            //     if (close > open) {
+            //         this.throw_error("Too many closing parentheses", true);
+            //     }
+            //     return false;
+            // }
+
             this._get_first_unresolved_child = function(cmd) {
-                // get the first child still hungry for more notes
-                // we do not look at the command itself (which is always true)
+                // resolved = we have determined the token's meaning
+                // if it has a child, it is resolved, even if its resolved property is false
 
                 if (cmd.children != undefined && cmd.children.length > 0) {
                     for (let i = 0; i < cmd.children.length; i++) {
@@ -165,7 +184,8 @@ const ProgramBuilder = (function (useweb) {
                         // else if it has children, test those
                         } else if (cmd.children[i].children !== undefined &&
                             cmd.children[i].children.length > 0) {
-                                return this._get_first_unresolved_child(cmd.children[i]);
+                                let retval = this._get_first_unresolved_child(cmd.children[i]);
+                                if (retval) return retval;
                         }
                     }
                     return undefined;
@@ -201,14 +221,12 @@ const ProgramBuilder = (function (useweb) {
             this.check_exp_token = function(note, token) {
                 let path = ["Exp"];
 
-                // ntok = new velato.token(_lexicon);
-
                 for(let i = 0; i < token.notes.length; i++)
                     path.push(token.notes[i].interval);
 
                 let matchedpath = path.reduce((o, n) => o[n], _lexicon)
                 if (matchedpath == undefined) {
-                    this.throw_error("Invalid note sequence, resetting line", true);
+                    this.throw_error("Invalid note sequence, resetting command", true);
                 }
                 if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
                     velato.web_display.feedback(`adding ${matchedpath["desc"]}`);
@@ -217,11 +235,16 @@ const ProgramBuilder = (function (useweb) {
                 if (!("node_type" in matchedpath) || matchedpath["node_type"] != "Token") {
                     return;
                 }
-                // ntok.notes = token.notes;
-                // ntok.setlexpath(path);
-                // this._curr_cmd.children.push(ntok);
 
                 token.setlexpath(path);
+                token.resolved = true;
+
+                // if (token.name == "CloseParens") {
+                //     token.exp_count -= 1;
+                // }
+                // if (token.name == "OpenParens") {
+                //     token.exp_count += 1;
+                // }
             }
 
             
@@ -237,7 +260,7 @@ const ProgramBuilder = (function (useweb) {
 
                 if (matchedpath == undefined) {
                     // we have hit a sequence not in the lexicon
-                    this.throw_error("Invalid note sequence, resetting line", true);
+                    this.throw_error("Invalid note sequence, resetting command", true);
                 }   
                 if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
                     //TODO: we have a category but not yet the command, so we print what we have
@@ -258,7 +281,7 @@ const ProgramBuilder = (function (useweb) {
                 } 
             }
 
-            // This is the main entry point -- given a note, it will update the this._curr_cmd and evaluate. returns bool to indicate program is complete
+            // This is the main entry point -- given a note, it will update _curr_cmd and evaluate. returns bool to indicate program is complete
             this.add_tone = function(note) {
 
                 if (this.root_note) {
@@ -281,6 +304,19 @@ const ProgramBuilder = (function (useweb) {
                     return;
                 }
 
+                // // If yes, let's make sure the Exps get turned into ExpSets
+                // for (let i = 0; i < this._curr_cmd.children.length; i++) {
+                //     if (this._curr_cmd.children[i].type == "Exp" && !this._curr_cmd.children[i].resolved) {
+                //         this._curr_cmd.children[i].type = "ExpSet";
+                //         this._curr_cmd.children[i].children = [];
+
+                //         let open_parens = new velato.token(_lexicon);
+                //         open_parens.setlexpath(["Exp","6th","6th"]);
+                //         open_parens.resolved = true;
+                //         this._curr_cmd.children[i].children.push(open_parens);
+                //     }
+                // }
+
                 // Yes, so we must be building its children (tones, expressions, etc)
                 if (this._curr_cmd.children.length == 0) {
                     this.throw_error("This note does not lead to a valid command", true); // FIXME: does this ever happen?
@@ -288,6 +324,7 @@ const ProgramBuilder = (function (useweb) {
 
                 // resolve child
                 let child = this._get_first_unresolved_child(this._curr_cmd);
+
                 if (child !== undefined) {
                     this.resolve_child(note, child);
                     child = this._get_first_unresolved_child(this._curr_cmd);
