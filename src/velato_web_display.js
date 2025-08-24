@@ -22,8 +22,9 @@ velato.web_display = (function() {
     const _get_note_list = function(node, set) {
         if (node.notes.length > 0) {
             let notes = node.notes;
-            if (node.type !== "Cmd" && notes.length > 0) {
-                notes[0].exp_name = node.print();
+            if (notes.length > 0 && !notes[0].exp_name) {
+
+                notes[0].exp_name = node.print(true);
             }
             set.push.apply(set, node.notes);
         }
@@ -70,10 +71,8 @@ velato.web_display = (function() {
             for (let note of noteIterator(notelist)) {
                 notestxt += `${note.vexname} $${note.displayname}$`;
                 if (isFirstNote) {
-                    // This is the first note, so we put command name
-                    if (commands[i].desc != undefined) {
-                        commandtxt += commands[i].desc;
-                    }
+                    // This is the first note, so is the command
+                    commandtxt += commands[i].print(true);
                     isFirstNote = false;
                 } else {
                     commandtxt += ", ";
@@ -116,7 +115,7 @@ velato.web_display = (function() {
         }
         if (commands.length == 0) return; 
 
-        if (commands.length == 1 && commands[0].print().length == 0) return;
+        if (commands.length == 1 && commands[0].print(false).length == 0) return;
 
         // do callback (for tests) before writing to doc incase doc doesn't exist
         if (velato.web_display.write_notes_callback) {

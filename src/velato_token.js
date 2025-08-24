@@ -16,7 +16,8 @@ velato.token = function(lex) {
     this.sequence = []; // notes, as strings, for the note sequence -- populated first
 
     this._print = ""; // print before children
-    this._postprint = ""; // print after children
+
+    this._print_staff = ""; // print for vextab 
 
     this.lexpath = undefined; // this will hold the path to the definition of the token
 
@@ -27,11 +28,10 @@ velato.token = function(lex) {
     this.indent = 0; // how many blocks it is in
 
 
-    this.setlexpath = function(lexpath) {
-        this.lexpath = lexpath; // the node in lexicon.json that this token is identified as
+    this.setlexpath = function(l) {
+        this.lexpath = l; // the node in lexicon.json that this token is identified as
 
-        let l = this._lexicon;
-        let val = this.lexpath.reduce((o, n) => o[n], l);
+        let val = l.reduce((o, n) => o[n], this._lexicon);
         this.is_defined = true;
 
         this.type = val.token_type;
@@ -39,7 +39,7 @@ velato.token = function(lex) {
         this.name = val.name;
         this.desc = val.desc;
         this._print = val.print;
-        this._postprint = val.postprint;
+        this._print_staff = val.print_staff;
         this.notedesc = val.notedesc;
         this.childCmds = val.childCmds;
 
@@ -69,18 +69,18 @@ velato.token = function(lex) {
         this.notes.push(note);
     }
 
-    this.print = function(retstr) {
-        if (retstr === undefined) retstr = "";
-
-        if (this.type == "Cmd")
+    this.print = function(staff) {
+        if (this.type == "Cmd" && !staff)
             for(let i = 0; i < this.indent;i++)
-                retstr += "\t";
+                printStr += "\t";
 
-        let printStr = this._print || "";
+        let printStr = (staff ? 
+            this._print_staff || "" : 
+            this._print || "");        
 
         for (let i = 0; i < this.children.length; i++) {
             let child = this.children[i];
-            printStr = printStr.replace(`{exp}`, child.print());
+            printStr = printStr.replace(`{exp}`, child.print(staff));
         }
         if (this.notes.length > 0 && this.notes[0].name)
             printStr = printStr.replace("{notename}", this.notes[0].name);
