@@ -69,14 +69,25 @@ velato.token = function(lex) {
         this.notes.push(note);
     }
 
-    this.print = function(staff) {
-        if (this.type == "Cmd" && !staff)
-            for(let i = 0; i < this.indent;i++)
-                printStr += "\t";
+    const escapeHtml = unsafe => {
+        return unsafe
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;")
+            .replaceAll("\n","String.fromCharCode(10)");
+            // FIXME: all control codes should be escaped
+    };
 
+    this.print = function(staff) {
         let printStr = (staff ? 
             this._print_staff || "" : 
             this._print || "");        
+
+        if (this.type == "Cmd" && !staff)
+            for(let i = 0; i < this.indent;i++)
+                printStr += "\t";
 
         for (let i = 0; i < this.children.length; i++) {
             let child = this.children[i];
@@ -86,7 +97,7 @@ velato.token = function(lex) {
             printStr = printStr.replace("{notename}", this.notes[0].name);
         printStr = printStr.replace("{varname}", this.sequence[0]);
         printStr = printStr.replace("{seq_int}", parseInt(this.sequence.join(""), 10).toString());
-        printStr = printStr.replace("{seq_char}", String.fromCharCode(...this.sequence));
+        printStr = printStr.replace("{seq_char}", escapeHtml(String.fromCharCode(parseInt(this.sequence.join(""), 10))));
 
         return printStr;
     }
