@@ -103,7 +103,7 @@
         },
         "5th": {
             "node_type": "Token",
-            "token_type": "Cmd",    
+            "token_type": "Cmd",
             "name": "Print",
             "print": "console.log({exp});",
             "print_staff": "Print",
@@ -112,12 +112,6 @@
                 "desc": "Expression"}
             ]
         }
-    },
-    "7th": {
-        "node_type": "Token",
-        "token_type": "Cmd",
-        "name": "Undo",
-        "desc": "Undo Last Command"
     }
 },
 "Exp": {

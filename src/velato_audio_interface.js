@@ -149,7 +149,8 @@ var velato_audio_interface = function () {
         document.getElementById("velato_program").innerHTML = "";
         document.getElementById("curr_cmd_notes").innerHTML = "";
         document.getElementById("feedback").innerHTML = "";
-        document.getElementById("output").innerHTML = "";
+        if (document.getElementById("output"))
+            document.getElementById("output").innerHTML = "";
         document.getElementById("program_txt").innerHTML = "";
 
         reset_root();

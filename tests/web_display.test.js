@@ -20,7 +20,7 @@ beforeEach(() => {
 
 test('vextab: single note command', () => {
     let cmds = [];
-    velato.web_display.write_notes_callback = (final_program, commands) => {
+    velato.web_display.write_notes_callback = (full_program, commands) => {
         cmds = commands;
     };
 
@@ -201,4 +201,94 @@ test('vextab: compound arithmetic', () => {
 
     expect(vex_out).toContain(",Set Root\n"); // Set Root Note alone
     expect(vex_out.replace(/\s/g, "")).toContain("text ++,.1,:q,Let, var_E, *, , +, , int, ,  44, , , int, ,  254, , , , %, , int, ,  257, , , , neg int, , -257, , ,".replace(/\s/g, ""));
+});
+
+test('vextab: Assign 5', () => {
+    let full_program = [];
+    let cmds = [];
+    
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        cmds = commands;
+    };
+
+    let pb = new velato.ObjPb(true);
+    pb.BEG_PROGRAM = '';
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("D",6));
+    pb.add_tone(get_note("E",6));
+
+    expect(cmds.length).toBe(2);
+
+    let vex_out = velato.web_display.build_vextab(cmds);
+
+    expect(vex_out.replace(/\s/g, "")).toContain("text Let, var_Cs_Db, int, ,  5, , |".replace(/\s/g, ""));
+});
+
+
+test('vextab: no doubled comma for incomplete command', () => {
+    let full_program = [];
+    let cmds = [];
+    
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        cmds = commands;
+    };
+
+    let pb = new velato.ObjPb(true);
+    pb.BEG_PROGRAM = '';
+
+    pb.add_tone(get_note("C",6));
+    pb.add_tone(get_note("C",6));
+    pb.add_tone(get_note("C",6));
+
+    expect(cmds.length).toBe(1);
+
+    let vex_out = velato.web_display.build_vextab(cmds);
+
+    expect(vex_out).not.toContain(",,");
+    expect(vex_out).toContain(", ,");
+});
+
+test('vextab: int draws with both digits', () => {
+    let cmds = [];
+    let curr_cmd = null;
+
+    velato.web_display.write_notes_callback = (f, commands) => {
+        if (f) // full program, not current command
+            cmds = commands;
+        else
+            curr_cmd = commands[0];
+    };
+
+    let pb = new velato.ObjPb(true);
+    pb.BEG_PROGRAM = '';
+
+    pb.add_tone(get_note("G♯ / A♭",6)); // Root
+    pb.add_tone(get_note("C",6)); // Let
+    pb.add_tone(get_note("B",6)); // var_b
+    pb.add_tone(get_note("G♯ / A♭",6));
+    pb.add_tone(get_note("C",6)); // NegativeInt
+    pb.add_tone(get_note("E",6)); // 8
+    pb.add_tone(get_note("B",6)); // 3
+    pb.add_tone(get_note("D",6)); // end of NegInt
+
+    expect(cmds.length).toBe(2);
+
+    let vex_out = velato.web_display.build_vextab(cmds);
+
+    expect(vex_out).toContain("-83");
+    expect(velato.web_display.build_vextab([curr_cmd])).toContain("-83");
 });

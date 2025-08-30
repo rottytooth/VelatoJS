@@ -49,7 +49,7 @@ velato.web_display = (function() {
 
     const reset_display = () => {}
 
-    const write_full_program = (full_program, js_program) => {
+    const write_js_program = (full_program, js_program) => {
         if (velato.web_display.write_full_callback) 
             velato.web_display.write_full_callback(full_program, js_program);
     }
@@ -57,7 +57,7 @@ velato.web_display = (function() {
     return {
         write_notes: write_notes,
         clear_curr_command: clear_curr_command,
-        write_full_program: write_full_program,
+        write_js_program: write_js_program,
         feedback: feedback,
         clear_feedback: clear_feedback,
         reset_display: reset_display,

@@ -96,8 +96,14 @@ velato.token = function(lex) {
         if (this.notes.length > 0 && this.notes[0].name)
             printStr = printStr.replace("{notename}", this.notes[0].name);
         printStr = printStr.replace("{varname}", this.sequence[0]);
-        printStr = printStr.replace("{seq_int}", parseInt(this.sequence.join(""), 10).toString());
-        printStr = printStr.replace("{seq_char}", escapeHtml(String.fromCharCode(parseInt(this.sequence.join(""), 10))));
+        if (this.sequence.length == 0) {
+            printStr = printStr.replace("{seq_int}", 0);
+            printStr = printStr.replace("{seq_char}", '');
+        } else {
+            printStr = printStr.replace("{seq_int}", parseInt(this.sequence.join(""), 10).toString());
+            printStr = printStr.replace("{seq_char}", escapeHtml(String.fromCharCode(parseInt(this.sequence.join(""), 10))));
+
+        }
 
         return printStr;
     }
