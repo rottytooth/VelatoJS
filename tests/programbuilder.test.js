@@ -163,13 +163,10 @@ test('While: command only', () => {
 
 test('EndBlock: command only', () => {
 
+    let full_program = [];
+
     velato.web_display.write_full_callback = (fp, js) => {
         full_program = fp;
-        output = js;
-    };
-
-    velato.web_display.write_notes_callback = (final_program, commands) => {
-        final_version = commands[0].name;
     };
 
     pb = new velato.ObjPb();
@@ -179,8 +176,8 @@ test('EndBlock: command only', () => {
     pb.add_tone(get_note("G",6));
     pb.add_tone(get_note("B",6));
 
-    expect(final_version).toBeDefined();
-    expect(final_version).toBe("EndBlock");
+    expect(full_program[1]).toBeDefined();
+    expect(full_program[1].name).toBe("EndBlock");
 });
 
 test('Print: command only', () => {
@@ -327,7 +324,7 @@ test('Print: variable with assigned variable name', () => {
     // assigned to the correct variable
     let fc_str = final_cmd.print();
     // expect(fc_str).toContain("class='var'");
-    expect(fc_str).toContain("print(");
+    expect(fc_str).toContain("console.log(");
     expect(fc_str).toContain("var_E");
 });
 
@@ -463,4 +460,223 @@ test('Let: comparison', () => {
     let fc_str = final_cmd.print();
     expect(fc_str).toContain("class='var'");
     expect(fc_str.replace(/\s/g, "")).toContain("=(444 + 257);".replace(/\s/g, ""));
+});
+
+test('Let: compound arithmetic expression', () => {
+    let full_program = [];
+    let final_cmds = [];
+
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        final_cmds = commands;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("C",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("E",6)); // variable E
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("G",6)); // times
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("E",6)); // plus
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("A",6)); // mod
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("A",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("E",6)); // negative int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("A",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    let final_cmd = full_program[full_program.length - 1];
+
+    // assigned to the correct variable
+    let fc_str = final_cmd.print();
+    expect(fc_str).toContain("class='var'");
+    expect(fc_str.replace(/\s/g, "")).toContain("= (( 44 +  254) * ( 257 %  -257));".replace(/\s/g, ""));
+});
+
+test('Fibonacci Program', () => {
+    let full_program = [];
+    let commands = [];
+    
+    // write the whole program as it is
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    // set root 
+    pb.add_tone(get_note("A",6));
+
+    // let var_c# = 0
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6));
+
+    expect(full_program[1].print().replace(/\s/g, "")).toContain("var_Cs_Db</span> = 0;".replace(/\s/g, ""));
+
+    // let var_f# = 1
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("F♯ / G♭",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("E",6));
+
+    expect(full_program[2].print().replace(/\s/g, "")).toContain("var_Fs_Gb</span> = 1;".replace(/\s/g, ""));
+
+    // let var_g# = 1 
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("G♯ / A♭",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("E",6));
+
+    expect(full_program[3].print().replace(/\s/g, "")).toContain("var_Gs_Ab</span> = 1;".replace(/\s/g, ""));
+
+    // while (var_g# < 11) {
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6)); // while
+
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("D",6)); // <
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("G♯ / A♭",6)); // var g#
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6)); // PositiveInt
+
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("E",6)); // 11
+
+    expect(full_program[4].print().replace(/\s/g, "")).toContain("while</span> ((<span class='var'> var_Gs_Ab</span> &lt;  11)) {".replace(/\s/g, ""));
+
+    // print(var_c#)
+    pb.add_tone(get_note("F♯ / G♭",6));
+    pb.add_tone(get_note("E",6)); // print
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("C♯ / D♭",6)); // var_c
+
+    expect(full_program[5].print().replace(/\s/g, "")).toContain("console.log(<span class='var'> var_Cs_Db</span>);".replace(/\s/g, ""));
+
+    // print \n
+    pb.add_tone(get_note("F♯ / G♭",6));
+    pb.add_tone(get_note("E",6)); // print
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("D",6)); //char
+
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6)); // 10
+
+    expect(full_program[6].print().replace(/\s/g, "")).toContain("console.log(String.fromCharCode(10))".replace(/\s/g, ""));
+
+    // let var_d = var_c# + var_f#
+    pb.add_tone(get_note("C♯ / D♭",6)); // let
+    pb.add_tone(get_note("D",6)); // var_d
+
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("C♯ / D♭",6)); // +
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("C♯ / D♭",6)); // var_c#
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("F♯ / G♭",6)); // var_f#
+
+    expect(full_program[7].print().replace(/\s/g, "")).toContain("<span class='var'>var_D</span> = (<span class='var'> var_Cs_Db</span> + <span class='var'> var_Fs_Gb</span>)".replace(/\s/g, ""));
+
+    // let var_c# = var_f#
+    pb.add_tone(get_note("C♯ / D♭",6)); // let
+    pb.add_tone(get_note("C♯ / D♭",6)); // var_c#
+
+    pb.add_tone(get_note("A",6)); 
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("F♯ / G♭",6)); // var_f#
+
+    expect(full_program[8].print().replace(/\s/g, "")).toContain("var_Cs_Db</span> = <span class='var'> var_Fs_Gb</span>".replace(/\s/g, ""));
+
+    // let var_f# = var_d
+    pb.add_tone(get_note("C♯ / D♭",6)); // let
+    pb.add_tone(get_note("F♯ / G♭",6)); // var_f#
+
+    pb.add_tone(get_note("A",6)); 
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("D",6)); // var_d
+
+    expect(full_program[9].print().replace(/\s/g, "")).toContain("var_Fs_Gb</span> = <span class='var'> var_D</span>".replace(/\s/g, ""));
+
+    // let var_g# = var_g# + 1
+    pb.add_tone(get_note("C♯ / D♭",6));
+    pb.add_tone(get_note("G♯ / A♭",6)); // var g#
+
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("C♯ / D♭",6)); // +
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("B",6));
+    pb.add_tone(get_note("G♯ / A♭",6)); // var g#
+
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("A♯ / B♭",6));
+    pb.add_tone(get_note("E",6)); // 1
+
+    expect(full_program[10].print().replace(/\s/g, "")).toContain("<span class='var'>var_Gs_Ab</span> = (<span class='var'> var_Gs_Ab</span> + 1);".replace(/\s/g, ""));
+
+    // } (end while)
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("C♯ / D♭",6));    
+
+    expect(full_program[11].print().replace(/\s/g, "")).toContain("}".replace(/\s/g, ""));
+
+    for (let i = 0; i < full_program.length; i++) {
+        console.log(full_program[i].print());
+    }
 });

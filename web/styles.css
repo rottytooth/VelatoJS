@@ -1,3 +1,6 @@
+body, html {
+    height: 100%;
+}
 @font-face {
     font-family: Ubuntu-Light;
     src: url(fonts/Ubuntu/Ubuntu-Light.ttf);
@@ -347,10 +350,19 @@ body, html {
 	box-shadow: 1px 1px 14px 3px rgba(154, 153, 153,0.25);	
     pointer-events: all;
     z-index: 9900;
+    text-align: left;
+    line-height: 140%;
+}
+#modal_content h3 {
+    font-size: 100%;
+    padding-bottom: 20px;
 }
 #modal_content p {
     width: 100%;
     text-align: left;
+}
+#modal_content ol li {
+    margin-bottom: 10px;
 }
 .close {
 	color: #aaa;
@@ -367,10 +379,12 @@ body, html {
 }
 
 /* Responsive layout - makes a one column layout instead of a two-column layout */
-@media (max-width: 800px) {
+@media (max-width: 1200px) {
     .main {
         flex-direction: column;
-        width: 100vh;
+        overflow-y: auto;
+        /* height: 100vh; */
+        scroll-behavior: smooth;
     }
     .box {
         padding-top: 15px;
@@ -388,5 +402,22 @@ body, html {
     }
     .note-program {
         padding-right: 10px;
+        font-size: 80%;
+    }
+    .col4 {
+        display: none;
+    }
+    #input-stream, #note-program {
+        font-size: 80%;
+    }
+    body {
+        overflow-y: auto;
+    }
+    #modal_content {
+        padding: 10px;
+        width: 90%;
+    }
+    #modal_content ol {
+        padding-left: 5px;
     }
 }

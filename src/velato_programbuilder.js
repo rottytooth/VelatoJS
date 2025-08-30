@@ -277,8 +277,22 @@ const ProgramBuilder = (function (useweb) {
 
                 if (matchedpath["name"] == "EndBlock") {
                     _cmd_stack.pop(); // pop the last command
-                    //FIXME: do we do this here?
                 } 
+            }
+
+            this.move_cmd_to_final_program = function() {
+                if (this._curr_cmd.hasOwnProperty('lexpath') && this._curr_cmd.lexpath) {
+                    // move to the final program
+                    _full_program.push(this._curr_cmd);
+
+                    // if it has child commands, also add it to the command stack
+                    if (this._curr_cmd.childCmds) {
+                        _cmd_stack.push(this._curr_cmd);
+                    }
+
+                    // reset
+                    this.reset_token();
+                }
             }
 
             // This is the main entry point -- given a note, it will update _curr_cmd and evaluate. returns bool to indicate program is complete
@@ -301,21 +315,13 @@ const ProgramBuilder = (function (useweb) {
                     this._curr_cmd.add_note(note);
                     this.check_cmd_token();
                     velato.web_display.write_notes(false, [this._curr_cmd]); // display it
+
+                    // if it has no children, consider it complete
+                    if (this._curr_cmd.children.length == 0) {
+                        this.move_cmd_to_final_program();
+                    }
                     return;
                 }
-
-                // // If yes, let's make sure the Exps get turned into ExpSets
-                // for (let i = 0; i < this._curr_cmd.children.length; i++) {
-                //     if (this._curr_cmd.children[i].type == "Exp" && !this._curr_cmd.children[i].resolved) {
-                //         this._curr_cmd.children[i].type = "ExpSet";
-                //         this._curr_cmd.children[i].children = [];
-
-                //         let open_parens = new velato.token(_lexicon);
-                //         open_parens.setlexpath(["Exp","6th","6th"]);
-                //         open_parens.resolved = true;
-                //         this._curr_cmd.children[i].children.push(open_parens);
-                //     }
-                // }
 
                 // Yes, so we must be building its children (tones, expressions, etc)
                 if (this._curr_cmd.children.length == 0) {
@@ -350,19 +356,14 @@ const ProgramBuilder = (function (useweb) {
                     }
 
                     // move to the final program
-                    _full_program.push(this._curr_cmd);
-
-                    // if it has child commands, also add it to the command stack
-                    if (this._curr_cmd.childCmds)
-                        _cmd_stack.push(this._curr_cmd);
-
-                    // reset
-                    this.reset_token();
+                    this.move_cmd_to_final_program();
                 }
 
                 velato.web_display.write_notes(false, [this._curr_cmd]);
 
                 // return false; // TODO: check for program completeness and return here
+                // Program Completeness means you mark the end of the program
+                // and then the JS executes. This is not implemented
             }
         }
     }

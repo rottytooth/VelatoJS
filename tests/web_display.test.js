@@ -145,3 +145,60 @@ test('vextab: addition', () => {
     expect(vex_out).toContain(",Set Root\n"); // Set Root Note alone
     expect(vex_out.replace(/\s/g, "")).toContain("var_E, +, , int, ,  444, , , , int, ,  257".replace(/\s/g, ""));
 });
+
+test('vextab: compound arithmetic', () => {
+    let cmds = [];
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        cmds = commands;
+    };
+
+    let pb = new velato.ObjPb(true);
+    pb.BEG_PROGRAM = '';
+
+    pb.add_tone(get_note("C",6));
+    pb.add_tone(get_note("E",6));
+    pb.add_tone(get_note("E",6)); // variable E
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("G",6)); // times
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("E",6)); // plus
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("E",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("G",6)); // 
+    pb.add_tone(get_note("A",6)); // mod
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("G",6)); // positive int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("A",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    pb.add_tone(get_note("C",6)); // value
+    pb.add_tone(get_note("E",6)); // negative int
+    pb.add_tone(get_note("D",6)); // digit
+    pb.add_tone(get_note("F",6)); // digit
+    pb.add_tone(get_note("A",6)); // digit
+    pb.add_tone(get_note("G",6)); // end of int
+
+    expect(cmds.length).toBe(2);
+
+    let vex_out = velato.web_display.build_vextab(cmds);
+
+    expect(vex_out).toContain(",Set Root\n"); // Set Root Note alone
+    expect(vex_out.replace(/\s/g, "")).toContain("text ++,.1,:q,Let, var_E, *, , +, , int, ,  44, , , int, ,  254, , , , %, , int, ,  257, , , , neg int, , -257, , ,".replace(/\s/g, ""));
+});
