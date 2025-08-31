@@ -78,7 +78,7 @@ velato.web_display = (function() {
                     commandtxt += commands[i].print(true);
                     isFirstNote = false;
                 } else {
-                    if (commandtxt[commandtxt.length-1] == ",") {
+                    if (commandtxt.length > 0 && commandtxt[commandtxt.length-1] == ",") {
                         commandtxt += " ";
                     }
                     commandtxt += ", ";
