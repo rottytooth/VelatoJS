@@ -105,9 +105,18 @@ const ProgramBuilder = (function (useweb) {
             }
 
             //#region write events
+
+            //FIXME: these events make this whole class basically a static object
+            // It would be much better to turn _full_program into a non-static field
+            // to fit how the rest of it works. And get rid of all of these events
+
             var _eventify_push = function(arr, callback) {
                 arr.push = function(e) {
                     Array.prototype.push.call(arr, e);
+                    callback(arr);
+                };
+                arr.pop = function(e) {
+                    Array.prototype.pop.call(arr, e);
                     callback(arr);
                 };
             };  
@@ -266,6 +275,14 @@ const ProgramBuilder = (function (useweb) {
 
                     // reset
                     this.reset_token();
+                }
+            }
+
+            this.clear_last = function() {
+                if (this._curr_cmd && this._curr_cmd.notes.length > 0) {
+                    this.reset_token();
+                } else if (_full_program.length > 0) {
+                    _full_program.pop();
                 }
             }
 
