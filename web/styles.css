@@ -378,6 +378,16 @@ body, html {
 	cursor: pointer
 }
 
+#command_entry {
+    flex-direction: column; 
+    display:flex; 
+    height:100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#command_entry div {
+    overflow-y: hidden;
+}
 /* Responsive layout - makes a one column layout instead of a two-column layout */
 @media (max-width: 1200px) {
     .main {

@@ -149,7 +149,8 @@ var velato_audio_interface = function () {
         document.getElementById("velato_program").innerHTML = "";
         document.getElementById("curr_cmd_notes").innerHTML = "";
         document.getElementById("feedback").innerHTML = "";
-        document.getElementById("output").innerHTML = "";
+        if (document.getElementById("output"))
+            document.getElementById("output").innerHTML = "";
         document.getElementById("program_txt").innerHTML = "";
 
         reset_root();
@@ -158,6 +159,10 @@ var velato_audio_interface = function () {
         if (is_stopped) {
             resume();
         }
+    }
+
+    function clear_last() {
+        velato.programbuilder.clear_last();
     }
 
     // These are for the INTRO modal 
@@ -179,7 +184,7 @@ var velato_audio_interface = function () {
 
         document.getElementById("stop").onclick = stopevent;
         document.getElementById("restart").onclick = reset_program;
-        // document.getElementById("remove").onclick = velato.programbuilder.remove_last_line;
+        document.getElementById("remove").onclick = clear_last;
 
         document.getElementById("modal").onclick = close_modal;
         document.getElementById("modal_content").onclick = block_close_modal;

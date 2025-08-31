@@ -7,7 +7,7 @@ if (typeof module !== 'undefined' && module.exports) {
     velato.c = require('./velato_constants');
 }
 
-let DEBUG = true;
+let DEBUG = false;
 
 velato.web_display = (function() {
     // Responsible for all user feedback and display of the program
@@ -20,9 +20,13 @@ velato.web_display = (function() {
     }
 
     const _get_note_list = function(node, set) {
+        // get the node's notes and attach its print() to the first note
         if (node.notes.length > 0) {
             let notes = node.notes;
-            if (notes.length > 0 && !notes[0].exp_name) {
+
+            // FIXME: Too much special handling here. exp_name should already be correct
+            // WARNING: The tests often don't catch timing issues here
+            if (notes.length > 0 && (!notes[0].exp_name || node.type == "NonFifthTone*")) {
 
                 notes[0].exp_name = node.print(true);
             }
@@ -60,12 +64,11 @@ velato.web_display = (function() {
                 commandtxt = "";
             }
 
-            if (commands[i].desc != undefined) {
-                if (commandtxt.length > 0)
-                    commandtxt += "\ntext ";
-                else
-                    commandtxt = "text ++,.1,:q,"; 
-            }
+            if (commandtxt.length == 0)
+                commandtxt = "text ++,.1,:q,"; 
+            else
+                commandtxt += "\ntext ";
+
             let lastIsBlank = false;
             let isFirstNote = true;
             for (let note of noteIterator(notelist)) {
@@ -75,12 +78,15 @@ velato.web_display = (function() {
                     commandtxt += commands[i].print(true);
                     isFirstNote = false;
                 } else {
+                    if (commandtxt.length > 0 && commandtxt[commandtxt.length-1] == ",") {
+                        commandtxt += " ";
+                    }
                     commandtxt += ", ";
                     commandtxt += note.exp_name || "";
                     lastIsBlank = !note.exp_name;
                 }
             }
-            if (lastIsBlank) {
+            if (lastIsBlank || commandtxt.trim()[commandtxt.trim().length - 1] == ",") {
                 commandtxt += "|";
             }
 
@@ -107,19 +113,25 @@ velato.web_display = (function() {
      * final_program = write to current command or final program?
      * stack = an array of velato.token command objects
      **/
-    const write_notes = (final_program, commands) => {
+    const write_notes = (full_program, commands) => {
 
         element = "curr_cmd_notes";
-        if (final_program) {
+        if (full_program) {
             element = "velato_program";
         }
         if (commands.length == 0) return; 
 
-        if (commands.length == 1 && commands[0].print(false).length == 0) return;
+        // if there's only one command and it has no notes and none of its children have notes
+        if (commands.length == 1 && 
+            commands[0].notes.length == 0 &&
+            (!commands[0].children || 
+                commands[0].children.every(child => Array.isArray(child.notes) && child.notes.length == 0))) 
+
+            return;
 
         // do callback (for tests) before writing to doc incase doc doesn't exist
         if (velato.web_display.write_notes_callback) {
-            velato.web_display.write_notes_callback(final_program, commands);
+            velato.web_display.write_notes_callback(full_program, commands);
         }
 
         if (typeof document == 'undefined') return;
@@ -147,11 +159,13 @@ velato.web_display = (function() {
             document.getElementById("curr_cmd_notes").innerHTML = "";
     }
 
-    const write_full_program = (full_program, js_program) => {
+    const write_js_program = (program_is_complete, js_program) => {
+        // TODO: program_is_complete will mark that the program should now be run
+
         if (typeof document == 'undefined') return;
         let output = document.getElementById("program_txt");
         output.innerHTML = js_program;
-    }   
+    }
 
     const feedback = function(desc, exp) {
         if (typeof document == 'undefined') return;
@@ -177,7 +191,7 @@ velato.web_display = (function() {
         build_vextab: build_vextab,
         write_notes: write_notes,
         clear_curr_command: clear_curr_command,
-        write_full_program: write_full_program,
+        write_js_program: write_js_program,
         feedback: feedback,
         clear_feedback: clear_feedback,
         reset_display: reset_display

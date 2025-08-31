@@ -1,5 +1,6 @@
 #FIBONACCI in Velato
 
+```
  // set key of A                        A
                                        
  let var_c# = 0                         C# C# | A E A E
@@ -16,17 +17,21 @@
     let var_f# = var_d                  C# F# | A B D F# B
     let var_g# = var_g# + 1             C# G# | E C# | A B G# | C# E Bb E
  }                                      A C#
+```
 
+##Expected output
 
-##Original JS
-
- var count = 11, num1 = 0, num2 = 1;
-
- for (var i = 1; i <= count; ++i)
- {
-    console.log(num1 + " ");
-
-    var sumOfPrevTwo = num1 + num2;
-    num1 = num2;
-    num2 = sumOfPrevTwo;
- }
+```
+// set root note to A
+var_Cs_Db =  0;
+var_Fs_Gb =  1;
+var_Gs_Ab =  1;
+while (( var_Gs_Ab <  11)) {
+    console.log( var_Cs_Db);
+    console.log( String.fromCharCode(10));
+    var_D = ( var_Cs_Db +  var_Fs_Gb);
+    var_Cs_Db =  var_Fs_Gb;
+    var_Fs_Gb =  var_D;
+    var_Gs_Ab = ( var_Gs_Ab +  1);
+}
+```

@@ -45,9 +45,9 @@
             <div id="controls">
                 <div id="stop" class="button">PAUSE</div>
                 <div id="restart" class="button">RESET</div>
-                <!-- <div id="remove" class="button">UNDO</div> -->
+                <div id="remove" class="button">UNDO</div>
             </div>
-            <div style="flex-direction: column; display:flex; height:100%;">
+            <div id="command_entry">
                 <div class="notes_header">Current Command</div>
                 <div id="curr_cmd_notes">
                 </div>
@@ -93,8 +93,8 @@
     </div>
 </div><div id="modal"><div id="modal_content"><span class="close" id='close'>&times;</span><h3>HOW TO WHISTLE A PROGRAM</h3>
     <ol>
-        <li>If you have a headset, do not use it! Use your device's microphone instead. Your headset is likely noise-cancelling and will ignore your whistling.</li>
-        <li>Whistle a note very briefly, and watch it show up in the input stream.  Push the pitch up and down to what you want. Hold it long enough and it registers as part of the program.</li>
+        <li><b>Do not use a headset!</b> It is likely noise-cancelling.</li>
+        <li>Whistle a tone very briefly, and see it appear in the input stream.  Push the pitch up and down to the note you want. Hold it long enough and it registers as part of the program.</li>
         <li>Whistle your first note to set the initial root. All intervals are in terms of that root.</li>
         <li>Continue whistling your program. Keep in mind that this language has a different grammar from the original Velato and from JS. For one thing, all operators are prefix. To add two numbers, whistle plus then the first, then the second. You can replace either with another expression.</li>
         <li>If you can't find the note, try the play buttons in the Lexicon. Most combinations have more than one possibility: major/minor or perfect/diminished. The play button will play both.</li>

@@ -30,16 +30,16 @@ const ProgramBuilder = (function (useweb) {
             velato.web_display = testd;
     }
     
-    var _lexicon = undefined; // the lexicon of commands and expressions, loaded from lexicon.json
+    var _lexicon = null; // the lexicon of commands and expressions, loaded from lexicon.json
 
     const _cmd_stack = []; // stack of cmd tokens that have opened but not yet closed. A command is popped when we meet its closing bracket
 
 
-    // var this._curr_cmd = undefined; // placeholder for the command we are currently building
+    this._curr_cmd = null; // placeholder for the command we are currently building
 
     const _full_program = []; // we build the velato program and js program from this
 
-    // this.root_note = null; // the current root note which we use to compare intervals
+    this.root_note = null; // the current root note which we use to compare intervals
 
     return class {
         #preset_to_change_key() {
@@ -62,7 +62,7 @@ const ProgramBuilder = (function (useweb) {
         }
 
         reset_token() {
-            if (_lexicon === undefined)
+            if (!_lexicon)
                 throw new Error("Attempting to create cmd obj without lexicon");
             this._curr_cmd = new velato.token(_lexicon);
             this._curr_cmd.indent = _cmd_stack.length;
@@ -105,9 +105,18 @@ const ProgramBuilder = (function (useweb) {
             }
 
             //#region write events
+
+            //FIXME: these events make this whole class basically a static object
+            // It would be much better to turn _full_program into a non-static field
+            // to fit how the rest of it works. And get rid of all of these events
+
             var _eventify_push = function(arr, callback) {
                 arr.push = function(e) {
                     Array.prototype.push.call(arr, e);
+                    callback(arr);
+                };
+                arr.pop = function() {
+                    Array.prototype.pop.call(arr);
                     callback(arr);
                 };
             };  
@@ -121,7 +130,7 @@ const ProgramBuilder = (function (useweb) {
                 for(let i = 0; i < updatedArr.length; i++) {
                     js_program += updatedArr[i].print(false) + "\n";
                 }
-                velato.web_display.write_full_program(_full_program, js_program);
+                velato.web_display.write_js_program(_full_program, js_program);
             });
             //#endregion
 
@@ -152,43 +161,25 @@ const ProgramBuilder = (function (useweb) {
                 }
             }
 
-            // this._check_even_parens = (token) => {
-            //     // if the ExpSet has the same number of openparens and close parens, we mark as complete
-            //     let open = 0;
-            //     let close = 0;
-            //     for (let i = 0; i < token.children.length; i++) {
-            //         if (token.children[i].name == "OpenParens") open++;
-            //         if (token.children[i].name == "CloseParens") close++;
-            //     }
-            //     if (open == close) {
-            //         token.resolved = true;
-            //         return true;
-            //     }
-            //     if (close > open) {
-            //         this.throw_error("Too many closing parentheses", true);
-            //     }
-            //     return false;
-            // }
-
             this._get_first_unresolved_child = function(cmd) {
                 // resolved = we have determined the token's meaning
                 // if it has a child, it is resolved, even if its resolved property is false
 
-                if (cmd.children != undefined && cmd.children.length > 0) {
+                if (!!cmd.children && cmd.children.length > 0) {
                     for (let i = 0; i < cmd.children.length; i++) {
                         // if it's resolved and have no children, return
                         if (!cmd.children[i].resolved && 
-                            (cmd.children[i].children === undefined ||
+                            (!cmd.children[i].children ||
                                 cmd.children[i].children.length == 0)) {
                             return cmd.children[i];
                         // else if it has children, test those
-                        } else if (cmd.children[i].children !== undefined &&
+                        } else if (!!cmd.children[i].children &&
                             cmd.children[i].children.length > 0) {
                                 let retval = this._get_first_unresolved_child(cmd.children[i]);
                                 if (retval) return retval;
                         }
                     }
-                    return undefined;
+                    return null;
                 }
             }
 
@@ -200,7 +191,7 @@ const ProgramBuilder = (function (useweb) {
 
             this.root_note = null;
 
-            this.ready_to_draw_tones = undefined; // callback to call when the lexicon is ready
+            this.ready_to_draw_tones = null; // callback to call when the lexicon is ready
 
 
             this.reset_program = function() {
@@ -210,7 +201,6 @@ const ProgramBuilder = (function (useweb) {
 
                 _program_text = '';
                 _cmd_stack.length = 0;
-                // this._curr_cmd = undefined;
                 _full_program.length = 0;
 
                 velato.web_display.reset_display();
@@ -225,7 +215,7 @@ const ProgramBuilder = (function (useweb) {
                     path.push(token.notes[i].interval);
 
                 let matchedpath = path.reduce((o, n) => o[n], _lexicon)
-                if (matchedpath == undefined) {
+                if (!matchedpath) {
                     this.throw_error("Invalid note sequence, resetting command", true);
                 }
                 if ("node_type" in matchedpath && matchedpath["node_type"] == "Category") {
@@ -238,13 +228,6 @@ const ProgramBuilder = (function (useweb) {
 
                 token.setlexpath(path);
                 token.resolved = true;
-
-                // if (token.name == "CloseParens") {
-                //     token.exp_count -= 1;
-                // }
-                // if (token.name == "OpenParens") {
-                //     token.exp_count += 1;
-                // }
             }
 
             
@@ -258,7 +241,7 @@ const ProgramBuilder = (function (useweb) {
 
                 let matchedpath = path.reduce((o, n) => o[n], _lexicon)
 
-                if (matchedpath == undefined) {
+                if (!matchedpath) {
                     // we have hit a sequence not in the lexicon
                     this.throw_error("Invalid note sequence, resetting command", true);
                 }   
@@ -295,6 +278,14 @@ const ProgramBuilder = (function (useweb) {
                 }
             }
 
+            this.clear_last = function() {
+                if (this._curr_cmd && this._curr_cmd.notes.length > 0) {
+                    this.reset_token();
+                } else if (_full_program.length > 0) {
+                    _full_program.pop();
+                }
+            }
+
             // This is the main entry point -- given a note, it will update _curr_cmd and evaluate. returns bool to indicate program is complete
             this.add_tone = function(note) {
 
@@ -302,15 +293,15 @@ const ProgramBuilder = (function (useweb) {
                     note.set_root(this.root_note);
                 }
 
-                // report tone to screen
+                // report tone to console
                 let root_str = "";
-                if (this.root_note != undefined) {
+                if (!!this.root_note) {
                     root_str = `, root note: ${this.root_note.displayname}`;
                 }
                 console.log(`registering ${note.with_octave()}${root_str}`);
                 
                 // Is the command we're building completely determined?
-                if (!this._curr_cmd.hasOwnProperty('lexpath') || this._curr_cmd.lexpath == undefined) {
+                if (!this._curr_cmd.hasOwnProperty('lexpath') || !this._curr_cmd.lexpath) {
                     // No, we need to add another note and re-test for completeness
                     this._curr_cmd.add_note(note);
                     this.check_cmd_token();
@@ -331,13 +322,13 @@ const ProgramBuilder = (function (useweb) {
                 // resolve child
                 let child = this._get_first_unresolved_child(this._curr_cmd);
 
-                if (child !== undefined) {
+                if (!!child) {
                     this.resolve_child(note, child);
                     child = this._get_first_unresolved_child(this._curr_cmd);
                 }
 
                 // no child returned, meaning command is DONE
-                if (child === undefined) {
+                if (!child) {
 
                     //TODO: if it's an undo, handle it now!
 
@@ -348,9 +339,9 @@ const ProgramBuilder = (function (useweb) {
                         // now that we have a root note, that note must itself be set as root
                         this.root_note.set_root(this.root_note);
 
-                        if (this.root_note != undefined) {
+                        // if (!!this.root_note) {
                             root_str = `, root note: ${this.root_note.displayname}`;
-                        }
+                        // }
 
                         console.log(`registered now as ${note.with_octave()}${root_str}`);
                     }
@@ -360,6 +351,8 @@ const ProgramBuilder = (function (useweb) {
                 }
 
                 velato.web_display.write_notes(false, [this._curr_cmd]);
+
+                // Also writes to the full program, but this happens through an event when we push to _full_program
 
                 // return false; // TODO: check for program completeness and return here
                 // Program Completeness means you mark the end of the program

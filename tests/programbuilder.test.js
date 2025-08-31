@@ -680,3 +680,47 @@ test('Fibonacci Program', () => {
         console.log(full_program[i].print());
     }
 });
+
+test('Float parsing: NaN', () => {
+    // A float with blank before decimal, blank after decimal
+
+    let full_program = [];
+    let final_cmds = [];
+
+    velato.web_display.write_full_callback = (fp, js) => {
+        full_program = fp;
+        output = js;
+    };
+
+    velato.web_display.write_notes_callback = (final_program, commands) => {
+        final_cmds = commands;
+    };
+
+    pb = new velato.ObjPb();
+    pb.BEG_PROGRAM = ''; 
+
+    pb.add_tone(get_note("A",6)); // Root
+    pb.add_tone(get_note("C♯ / D♭",6)); // Let
+    pb.add_tone(get_note("C♯ / D♭",6)); // var_Cs_Db
+    pb.add_tone(get_note("A",6));
+    pb.add_tone(get_note("F♯ / G♭",6)); // Positive Float    
+    pb.add_tone(get_note("E",6)); // End of Before Decimal
+    pb.add_tone(get_note("D♯ / E♭",6)); // End of After Decimal
+
+    let final_cmd = full_program[full_program.length - 1];
+
+    // assigned to the correct variable
+    let fc_str = final_cmd.print();
+    expect(fc_str).not.toContain("NaN");
+});
+
+test('No Command: Seventh (no mapping)', () => {
+    let pb = new velato.ObjPb(true);
+    pb.BEG_PROGRAM = '';
+
+    pb.add_tone(get_note("A",6));
+
+    expect(() => {
+        pb.add_tone(get_note("G♯ / A♭",6));
+    }).toThrow("SYNTAX ERROR : Invalid note sequence, resetting command");
+});
