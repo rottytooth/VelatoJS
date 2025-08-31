@@ -115,8 +115,8 @@ const ProgramBuilder = (function (useweb) {
                     Array.prototype.push.call(arr, e);
                     callback(arr);
                 };
-                arr.pop = function(e) {
-                    Array.prototype.pop.call(arr, e);
+                arr.pop = function() {
+                    Array.prototype.pop.call(arr);
                     callback(arr);
                 };
             };  
