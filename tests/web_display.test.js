@@ -292,3 +292,37 @@ test('vextab: int draws with both digits', () => {
     expect(vex_out).toContain("-83");
     expect(velato.web_display.build_vextab([curr_cmd])).toContain("-83");
 });
+
+test('vextab and final prog: float draws with all digits', () => {
+    let cmds = [];
+    let curr_cmd = null;
+
+    velato.web_display.write_notes_callback = (f, commands) => {
+        if (f) // full program, not current command
+            cmds = commands;
+        else
+            curr_cmd = commands[0];
+    };
+
+    let pb = new velato.ObjPb(true);
+    pb.BEG_PROGRAM = '';
+
+    pb.add_tone(get_note("G♯ / A♭",6)); // Root
+    pb.add_tone(get_note("C",6)); // Let
+    pb.add_tone(get_note("B",6)); // var_b
+    pb.add_tone(get_note("G♯ / A♭",6));
+    pb.add_tone(get_note("F",6)); // PostiveFloat
+    pb.add_tone(get_note("E",6)); // 8
+    pb.add_tone(get_note("B",6)); // 3
+    pb.add_tone(get_note("D",6)); // decimal
+    pb.add_tone(get_note("C",6)); // 4
+    pb.add_tone(get_note("D",6)); // end of PostiveFloat
+
+    expect(cmds.length).toBe(2);
+
+    let vex_out = velato.web_display.build_vextab(cmds);
+
+    expect(cmds[1].print()).toContain("83.4");
+    expect(vex_out.replace(/\s/g, "")).toContain("83.4".replace(/\s/g, ""));
+    expect(velato.web_display.build_vextab([curr_cmd]).replace(/\s/g, "")).toContain("83.4".replace(/\s/g, ""));
+});

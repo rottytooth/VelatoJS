@@ -181,14 +181,15 @@
             "children": [
                 {"token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
-                "print": "{seq_int}"},
+                "print": "{seq_int}",
+                "print_staff": "{seq_int} "},
                 {"token_type": "NonFifthTone*",
                 "desc": "single note for each digit, avoiding 5th",
-                "print": ".{seq_int} ",
-                "print_staff": ".{seq_int} "}
+                "print": "{seq_int} ",
+                "print_staff": "{seq_int} "}
             ],
-            "print": "{exp}",
-            "print_staff": "{exp}"
+            "print": "{exp}.{exp}",
+            "print_staff": "{exp}.{exp}"
         },
         "7th": {
             "node_type": "Token",
